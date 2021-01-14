@@ -1,0 +1,5 @@
+{
+  "replayScript": "/home/newdriver/Storage/Research/PRex_GEM/PRex_pedestal_generator/mpd4_decoder",
+  "MAPPING":"Mapping/prex_lhrs_focalplane.cfg",
+  "NEVENT": "1000000"
+}
