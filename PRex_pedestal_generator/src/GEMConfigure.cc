@@ -3,10 +3,13 @@
 
 using namespace std;
 
+extern const std::string gemRunConfigFname;
+
 GEMConfigure::GEMConfigure()
 {
     nFile = 0;
-    configure_file = "config/gem.cfg";
+//    configure_file = "config/gem.cfg";
+    configure_file = gemRunConfigFname.c_str();
     cout<< "GEMConfigure: input configure file: "<< configure_file << endl;
     //LoadConfigure();
 }

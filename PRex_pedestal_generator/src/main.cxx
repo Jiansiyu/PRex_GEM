@@ -17,11 +17,19 @@
 
 #include "BenchMark.h"
 
+extern std::string gemRunConfigFname="config/gem.cfg";
+
 using namespace std;
 
 int main(int argc, char* argv[])
 {
+  if (argc == 2) {
+      gemRunConfigFname = argv[1];
+  }
+
   TApplication theApp("app", &argc, argv);
+
+  std::cout<<"Using configure file \""<< gemRunConfigFname<<"\""<<std::endl;
   //gROOT->SetBatch();
   BenchMark timer;
   InputHandler inputHandler;
