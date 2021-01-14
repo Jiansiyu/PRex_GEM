@@ -1,0 +1,8 @@
+bin
+builder
+cmake-build-debug
+*.o
+*.so
+*.d
+*.idea
+*.exe
