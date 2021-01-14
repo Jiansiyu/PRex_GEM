@@ -1,0 +1,6 @@
+runID,runType,Mapping,savepedestal,pedestal
+1371,pedestal,/home/newdriver/Storage/Research/PRex_GEM/PRex_pedestal_generator/Mapping/prex_lhrs_focalplane.cfg,/home/newdriver/pyQuant/PRex_GEM/replayed/pedestal/pedestal_LHRS_1371.root,/home/newdriver/pyQuant/PRex_GEM/replayed/pedestal/pedestal_LHRS_1371.root
+2056,pedestal,/home/newdriver/Storage/Research/PRex_GEM/PRex_pedestal_generator/Mapping/prex_lhrs_focalplane.cfg,/home/newdriver/pyQuant/PRex_GEM/replayed/pedestal/pedestal_LHRS_2056.root,/home/newdriver/pyQuant/PRex_GEM/replayed/pedestal/pedestal_LHRS_2056.root
+2302,pedestal,/home/newdriver/Storage/Research/PRex_GEM/PRex_pedestal_generator/Mapping/prex_lhrs_focalplane.cfg,/home/newdriver/pyQuant/PRex_GEM/replayed/pedestal/pedestal_LHRS_2302.root,/home/newdriver/pyQuant/PRex_GEM/replayed/pedestal/pedestal_LHRS_2302.root
+20512,pedestal,/home/newdriver/Storage/Research/PRex_GEM/PRex_pedestal_generator/Mapping/prex_lhrs_focalplane.cfg,/home/newdriver/pyQuant/PRex_GEM/replayed/pedestal/pedestal_RHRS_20512.root,/home/newdriver/pyQuant/PRex_GEM/replayed/pedestal/pedestal_RHRS_20512.root
+21425,pedestal,/home/newdriver/Storage/Research/PRex_GEM/PRex_pedestal_generator/Mapping/prex_lhrs_focalplane.cfg,/home/newdriver/pyQuant/PRex_GEM/replayed/pedestal/pedestal_RHRS_21425.root,/home/newdriver/pyQuant/PRex_GEM/replayed/pedestal/pedestal_RHRS_21425.root
