@@ -27,6 +27,21 @@ A modified version of the UVa MPD4 decoder.
 * it will generate a file named PRex_Pedestal.txt
 * this file is conpatible with the standard prex pedestal, need to replace the pedestal in the prex database
 
+## New features 
+### 1. add function to take standalone configure file
+Option 1.
+```c++
+./mpd4_decoder
+
+# it will load the default configure file which located in folder ./config/gem.cfg
+```
+Option 2.
+```c++
+./mpd4_decoder config.cfg
+# it will load config.cfg instead of using the default ./config/gem.cfg file
+```
+
+
 
 ## RUN LIST
 
