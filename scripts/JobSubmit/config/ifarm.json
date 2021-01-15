@@ -1,5 +1,9 @@
 {
-  "replayScript": "/home/newdriver/Storage/Research/PRex_GEM/PRex_pedestal_generator/mpd4_decoder",
+  "replayCommand": "/home/newdriver/Storage/Research/PRex_GEM/PRex_pedestal_generator/mpd4_decoder",
   "MAPPING":"Mapping/prex_lhrs_focalplane.cfg",
-  "NEVENT": "1000000"
+  "NEVENT": "1000000",
+  "ConfigSavePath": "/home/newdriver/Storage/Research/PRex_GEM/scripts/JobSubmit/JobsConfig/",
+  "defaultRawPath": "/home/newdriver/PRex/PRex_Data/Raw",
+  "defaultPedestalPath": "/home/newdriver/Storage/Research/PRex_GEM/PRex_pedestal_generator/Pedestal",
+  "defaultSavePath":"/home/newdriver/pyQuant/PRex_GEM/replayed/rootfiles"
 }

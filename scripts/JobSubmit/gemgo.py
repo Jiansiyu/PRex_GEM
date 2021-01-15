@@ -10,7 +10,7 @@ import json
 import sys
 import random
 import csv
-
+from multiprocessing import Pool
 class runErrorList:
     FileNotFoundList=[]
     RuntimeErrorList = []
@@ -35,7 +35,7 @@ class gemJobs:
     HitRootFile =""
     rawFileName=""
     nfiles = 3
-    FLag = False
+    runConfigFile = ""
     rawDataStri=""
     def __init__(self,runType="",runID=0,Mapping="",SavePedestal="",LoadPedestal="",nevent=0,HitRootFile ="",Nfile=0):
         self.runID = runID
@@ -79,7 +79,8 @@ class gemJobs:
 
         configJob = runConfigGenerator(runType=self.runType,Mapping=self.Mapping,SavedPed=self.SavePedestal,LoadPed=self.LoadPedestal,\
                                        Nevent=self.nfiles*1000000,HitRootFile=self.HitRootFile,NFIle=self.nfiles,InputString=self.rawDataStri)
-        configJob.SaveConfig(fname=JobSavePath)
+        self.runConfigFile = configJob.SaveConfig(fname=JobSavePath)
+
     def getRawfilename(self):
         if not self.rawFileName:
             filename = "prexLHRS_{}.dat".format(self.runID)
@@ -169,6 +170,7 @@ class runConfigGenerator:
         text_file = open(fname, "w")
         text_file.write(self.ConfigStr)
         text_file.close()
+        return  fname
 
 class runListAPI:
     '''
@@ -278,6 +280,16 @@ class localSubmitter(JobSubmitter):
         print(self.defaultRawPath)
         print(self.defaultSavePath)
 
+    def _run(self,runConfigfile = ""):
+        if self.isfileexist(runConfigfile):
+            logging.info("Working on {}".format(runConfigfile))
+            # print(runConfigfile)
+            os.system("{} {}".format(self.replayCommand,runConfigfile))
+
+    def runAll(self,ncores = 8):
+        threadPool = Pool(ncores)
+        threadPool.map(self._run,[job.runConfigFile for job in self.JobArray])
+
     def replaySingleRun(self,job=gemJobs()):
         if job.Validate():
             job.getrunConfig(JobSavePath=os.path.join(self.JobConfigSavePath,"runConfig_{}.cfg".format(job.runID)))
@@ -296,6 +308,7 @@ class localSubmitter(JobSubmitter):
             if self.SearchRawRange(job.getRawfilename()):
                 job.nfiles = self.SearchRawRange(job.getRawfilename())[1]
             self.replaySingleRun(job=job)
+            self.JobArray.append(job)
 
     def replay(self,runID=-999,runType ="",csvList=''):
         if runID != -999:
@@ -323,6 +336,7 @@ if __name__ == '__main__':
     #             if "ifarm" not  in os.uname().nodename:
     runner = localSubmitter()
     runner.replayCSV()
+    runner.runAll()
 
     # a = tester()
     # a.jobsubmitter()
