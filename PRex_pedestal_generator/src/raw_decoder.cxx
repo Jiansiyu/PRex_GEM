@@ -365,6 +365,7 @@ map<int, vector<int> > RawDecoder::ZeroSup(map<int,vector<int> > mMapping, map<i
   for(it = mAPVRawSingleEvent.begin(); it!=mAPVRawSingleEvent.end(); ++it)
   {
     hybridID = it->first;
+      if (mMapping.find(hybridID)==mMapping.end()) continue;
     mpd_id = GetMPD_ID(hybridID);     
     adc_ch = GetADC_ch(hybridID);
     
@@ -480,6 +481,7 @@ map<int, vector<int> > RawDecoder::DrawHits(map<int,vector<int> > mMapping, map<
   {
 
     hybridID = it->first;
+      if (mMapping.find(hybridID)==mMapping.end()) continue;
     mpd_id = GetMPD_ID(hybridID);     
     adc_ch = GetADC_ch(hybridID);
     

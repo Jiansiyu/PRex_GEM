@@ -65,7 +65,7 @@ class gemJobs:
         if not self.HitRootFile:
             rawfname = "prexLHRS_{}.root".format(self.runID)
             if self.runID > 20000:
-                rawfname = "prexRHRS_{}.root".format(self.runID)
+                rawfname = "prexRHRS_UVaGEM_{}.root".format(self.runID)
             self.HitRootFile = os.path.join(self.defaultSavePath,rawfname)
 
         if not self.rawDataStri:

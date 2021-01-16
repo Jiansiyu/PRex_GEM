@@ -1,0 +1,3 @@
+[submodule "SBSGEM_standalone"]
+	path = SBSGEM_standalone
+	url = https://github.com/Jiansiyu/SBSGEM_standalone.git
