@@ -136,7 +136,7 @@ int InputHandler::LoadConfigFile()
 int InputHandler::LoadMapping()
 {
   
-  char *MappingFile_temp = new char[100];
+  char *MappingFile_temp = new char[1000];
   strcpy(MappingFile_temp,MappingFile.c_str());
   cout<<"Mapping!!!   "<<MappingFile_temp<<endl;
   ifstream filestream (MappingFile_temp, ifstream::in); 

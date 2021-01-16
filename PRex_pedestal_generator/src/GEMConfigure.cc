@@ -61,7 +61,7 @@ void GEMConfigure::LoadConfigure()
 	    {
 		tokens = strtok(NULL, " :,");
 		mapping = tokens;
-//        cout<<"mapping = " << tokens << endl;
+        cout<<"mapping = " << tokens << endl;
 	    }
 	    else if(s=="SAVEPED")
 	    {

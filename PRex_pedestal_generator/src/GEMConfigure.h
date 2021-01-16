@@ -36,7 +36,7 @@ public:
 
     // make following variables public
     // input files to be analyzed...
-    string fileList[1000];
+    string fileList[5000];
     string fileHeader;
     int nFile;
     int evioStart;
