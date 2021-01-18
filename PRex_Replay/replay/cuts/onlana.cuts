@@ -1,0 +1,17 @@
+#
+# Cut definitions 
+#
+
+Block: RawDecode
+
+Block: Reconstruct
+
+Block: Physics
+
+#evtyp1            g.evtyp==1        # Event type 1 (=HRSR main trigger)
+#evtyp3            g.evtyp==3
+# (NO cut)RawDecode_master  evtyp1||evtyp3    
+
+
+
+

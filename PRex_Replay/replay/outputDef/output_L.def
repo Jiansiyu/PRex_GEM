@@ -1,0 +1,167 @@
+# Analyzer output definition file used by THaOutput class.
+# See  http://hallaweb.jlab.org/root/THaOutput.html
+
+begin epics
+   hac_bcm_average
+   IPM1H04A.XPOS
+   IPM1H04A.YPOS
+   IPM1H04B.XPOS
+   IPM1H04B.YPOS
+   IPM1H04C.XPOS
+   IPM1H04C.YPOS
+   IPM1H04D.XPOS
+   IPM1H04D.YPOS
+   IPM1H04E.XPOS
+   IPM1H04E.YPOS
+   IPM1H04B
+   IPM1H04C
+   IPM1H04D
+end epics
+
+
+# THaScalerEvtHandler vars
+#variable LeftTSbcmu1	
+#variable LeftTSbcmu1r	
+
+# this makes a BIG output and slows the code
+block L.*
+
+block P.*
+
+block EK_L.*
+	
+# Tracking variables
+variable L.tr.n
+variable L.tr.x
+variable L.tr.y
+variable L.tr.th
+variable L.tr.ph
+variable L.tr.d_x
+variable L.tr.d_y
+variable L.tr.d_th
+variable L.tr.d_ph
+variable L.tr.r_x
+variable L.tr.r_y
+variable L.tr.r_th
+variable L.tr.r_ph
+variable L.tr.tg_y
+variable L.tr.tg_th
+variable L.tr.tg_ph
+variable L.tr.tg_dp
+variable L.tr.p
+variable L.gold.x
+variable L.gold.y
+variable L.gold.th
+variable L.gold.ph
+variable L.gold.dp
+variable L.gold.ok
+variable L.gold.p
+formula L.sv.x L.gold.x+0.8*L.gold.th
+formula L.sv.y L.gold.y+0.8*L.gold.ph
+
+
+#  Beam position from unrastered beam, BPMA and BPMB
+#variable urb.BPMA.x
+#variable urb.BPMA.y
+#variable urb.BPMB.x
+#variable urb.BPMB.y
+
+
+# ------------------------------------------------------------------
+# DETECTOR CHECK OUT HISTOGRAMS 
+# ------------------------------------------------------------------
+#
+# ------------------------------------------------------------------
+# LEFT ARM DETECTORS 
+# ------------------------------------------------------------------
+#
+# LEFT ARM S2 (used in APEX but not in PREX)
+
+TH1F Ls2lt 'Left arm S2 L-PMT TDCs' L.s2.lt 750 1001 2500 L.s2.lt>0.
+TH1F Ls2rt 'Left arm S2 R-PMT TDCs' L.s2.rt 750 1001 2500 L.s2.rt>0.
+
+TH1F Ls2la 'Left arm S2 L-PMT ADCs' L.s2.la 150 281 880 L.s2.la>0.
+TH1F Ls2ra 'Left arm S2 R-PMT ADCs' L.s2.ra 150 281 880 L.s2.ra>0.
+
+#TH1F Ls2la_p 'Left arm S2 L-PMT ADCs (PedSub)' L.s2.la_p 150 -10 299 L.s2.la_p>0.
+#TH1F Ls2ra_p 'Left arm S2 R-PMT ADCs (PedSub)' L.s2.ra_p 150 -10 299 L.s2.ra_p>0.
+
+# ------------------------------------------------------------------
+# LEFT ARM VDC wires and timing  :
+
+TH1F Lvu1t 'L-arm VDC u1 time' L.vdc.u1.rawtime 200 401 3200 
+TH1F Lvu2t 'L-arm VDC u2 time' L.vdc.u2.rawtime 200 401 3200 
+TH1F Lvv1t 'L-arm VDC v1 time' L.vdc.v1.rawtime 200 401 3200 
+TH1F Lvv2t 'L-arm VDC v2 time' L.vdc.v2.rawtime 200 401 3200 
+
+TH1F Lvu1w 'L-arm VDC u1 wires' L.vdc.u1.wire 400 1 400 
+TH1F Lvu2w 'L-arm VDC u2 wires' L.vdc.u2.wire 400 1 400 
+TH1F Lvv1w 'L-arm VDC v1 wires' L.vdc.v1.wire 400 1 400 
+TH1F Lvv2w 'L-arm VDC v2 wires' L.vdc.v2.wire 400 1 400 
+
+TH1F Lvu1nhit 'L-arm VDC u1 TDC channel hits ' L.vdc.u1.nthit 20 0 10
+TH1F Lvu2nhit 'L-arm VDC u2 TDC channel hits ' L.vdc.u2.nthit 20 0 10
+TH1F Lvv1nhit 'L-arm VDC v1 TDC channel hits ' L.vdc.v1.nthit 20 0 10
+TH1F Lvv2nhit 'L-arm VDC v2 TDC channel hits ' L.vdc.v2.nthit 20 0 10
+
+# ------------------------------------------------------------------
+
+
+# TH2F BPMAxy 'Beam position from BPMA' urb.BPMA.x urb.BPMA.y 40 -0.005 0.005 40 -0.005 0.005 
+# TH2F BPMBxy 'Beam position from BPMB' urb.BPMB.x urb.BPMB.y 40 -0.005 0.005 40 -0.005 0.005 
+
+# ---------------------------------------------------------------------
+# Single arm TRACK reconstruction plots :
+#  NB: the cuts are defined in the cut file (onlana.cuts)
+#  NB2: this is a merging of e04012 plots and optics.odef plots
+
+TH1F Lntrk 'L-arm number of tracks' L.tr.n 20 -1 9
+TH2F Ltga  'L-arm tgt theta-phi' L.tr.tg_ph L.tr.tg_th 50 -0.05 0.05 100 -0.1 0.1
+TH1F Ltrn  'L-arm number of tracks' L.tr.n 20 -0.5 10.5
+TH2F Lxydet 'L-arm VDC ydet:xdet' L.tr.d_x L.tr.d_y 50 -1 1 50 -.2 .2 
+TH2F Lxyfp 'L-arm yfp:xfp' L.tr.x L.tr.y 50 -1 1 50 -.2 .2     
+TH2F Lthphfp 'L-arm phfp:thfp' L.tr.th L.tr.ph 50 -.2 .2 50 -0.1 0.1
+TH2F Lxthfp 'L-arm thfp:xfp' L.tr.x L.tr.th 50 -1 1 50 -.2 .2     
+TH2F Lyphfp 'L-arm phfp:yfp' L.tr.y L.tr.ph 50 -.2 .2 50 -0.1 0.1 
+TH1F Lytg  'L-arm ytg'     L.gold.y  250 -0.1 0.1             
+TH2F Lthphtg 'L-arm tgt th:ph' L.gold.ph L.gold.th 50 -0.04 0.04 50 -0.08 0.08 
+TH2F Lxysv 'L-arm sieve y:x' L.sv.x L.sv.y 50 -.1 .1 50 -.1 .1 
+TH1F Ldp   'L-arm delta'   L.gold.dp 1000 -0.06 0.06         
+TH1F Ltgdp  'L-arm momentum' L.tr.tg_dp 100 -0.2 0.2
+TH1F Ldpctr 'L-arm delta center hole' L.gold.dp 1000 -0.05 0.05 
+
+# Podd thinks P.upQadcL is a vector.  but this works.  same loQadcL.
+#TH1F upQadcL  'L-arm upper main Quartz' P.upQadcL[0] 100 0  2000
+#TH1F loQadcL  'L-arm lower main Quartz' P.loQadcL 100 0  2000
+#TH1F atlQadcL 'L-arm left A_T Quartz'  P.atlQadcL 100 0  2000
+#TH1F atrQadcL 'L-arm right A_T Quartz' P.atlQadcL 100 0  2000
+#TH1F upfadcQL  'L-arm upper main Quartz (FADC)' P.fadcUQL 1000 20000 35000
+#TH1F lofadcQL  'L-arm upper main Quartz (FADC)' P.fadcDQL 1000 20000 35000
+
+
+#TH1F S0AtdcL 'L-arm S0A TDC ' P.S0AtdcL 100 0 2200
+#TH1F S0BtdcL 'L-arm S0B TDC ' P.S0BtdcL 100 0 2200
+#TH1F S0AadcL 'L-arm S0A ADC ' P.S0AadcL 100 0 6000
+#TH1F S0BadcL 'L-arm S0B ADC ' P.S0BadcL 100 0 6000
+
+
+# can also do S3
+block LGEM.tr.*
+block LGEM.lgems.*
+block LGEM.lgems.[xy][123456].adc*
+block LGEM.lgems.[xy][123456].trigger_time
+block LGEM.lgems.[xy][123456].ev_num
+block LGEM.lgems.[xy][123456].nhits
+block LGEM.lgems.[xy][123456].hit.*
+block LGEM.lgems.[xy][123456].strip.*
+block LGEM.lgems.[xy][123456].coord.*
+block LGEM.lgems.[xy].nroads
+block LGEM.lgems.[xy].ngood
+block LGEM.lgems.[xy].rd.*
+
+variable LGEM.gold.x
+variable LGEM.gold.y
+variable LGEM.gold.th
+variable LGEM.gold.ph
+variable LGEM.gold.dp
+variable LGEM.gold.ok
