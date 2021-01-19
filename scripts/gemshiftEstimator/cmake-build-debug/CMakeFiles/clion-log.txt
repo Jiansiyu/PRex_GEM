@@ -1,0 +1,5 @@
+/snap/clion/138/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/newdriver/Storage/Research/PRex_GEM/scripts/gemshiftEstimator
+-- Found ROOT 6.14/04 in /home/newdriver/Source/ROOT_CERN/root-6.14.04/root-6.14.04-install
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/newdriver/Storage/Research/PRex_GEM/scripts/gemshiftEstimator/cmake-build-debug

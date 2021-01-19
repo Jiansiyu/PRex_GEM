@@ -1,0 +1,1 @@
+/usr/bin/c++   -pthread -std=c++11 -m64 -I/home/newdriver/Source/ROOT_CERN/root-6.14.04/root-6.14.04-install/include   CMakeFiles/runVerifier.dir/main.cpp.o CMakeFiles/runVerifier.dir/runVerifier.cpp.o  -o runVerifier 

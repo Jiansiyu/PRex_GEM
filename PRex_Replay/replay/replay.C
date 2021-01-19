@@ -67,8 +67,8 @@ void replay(Int_t runNo=0, Int_t lastevt=-1, TString target=""){
     }
 
     // code  used for decode the BPM and the raster current
-    THaApparatus *Lrb = new TriFadcRasteredBeam(Form("%srb",HRS.Data()),"Raster Beamline for FADC ");
-    gHaApps->Add(Lrb);
+//    THaApparatus *Lrb = new TriFadcRasteredBeam(Form("%srb",HRS.Data()),"Raster Beamline for FADC ");
+//    gHaApps->Add(Lrb);
 
     // e-p scattering
     Double_t amu = 931.494028*1.e-3;  // amu to GeV
