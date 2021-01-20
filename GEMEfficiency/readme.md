@@ -24,7 +24,13 @@ gemVDCTrackEfficiency(fname)
 Project the GEM detector back to the VDC and calculate the VDC tracking efficiency.
 ```c++
 
-
 ```
 
+
+## Get the Signal vs. Noise Distribution 
+```c++
+gemNoiseSignalLevel()
+```
+
+![](./doc/x_dist.jpg)
 
