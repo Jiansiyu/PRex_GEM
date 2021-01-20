@@ -44,6 +44,9 @@ private:
 };
 
 void ReadDatabase(TString HRS = "R",TString DB_DIR="./"){
+
+    std::cout<<"DB path "<< DB_DIR.Data()<<std::endl;
+
     dbbuff.clear();
     shiftbuffX.clear();
     shiftbuffY.clear();
@@ -54,6 +57,7 @@ void ReadDatabase(TString HRS = "R",TString DB_DIR="./"){
     } else{
         dbfname =  Form("%s/db_LGEM.lgems.dat",DB_DIR.Data());
     }
+
     if (gSystem->AccessPathName(dbfname.Data())){
         std::cout<<"[ERROR]:: "<<"CAN NOT FIND DB  \""<<dbfname.Data()<<"\""<<std::endl;
         exit(-1);
@@ -114,8 +118,6 @@ void fcn_residual(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t 
     // firt ste, only take the tranlation into consideration
     Double_t chisq=0.0;
 
-
-
     f=chisq;
 }
 
@@ -126,119 +128,6 @@ void Optimizer(Int_t chamberID){
 
 }
 
-void LoadRaw(TString fname){
-    TChain *chain= new TChain("T");
-    chain->Add(fname.Data());
-
-    Int_t runID = chain->GetMaximum("fEvtHdr.fRun");
-
-    TString HRS = "L";
-    TString GEMProfix = "LGEM.lgems";
-    if (runID>20000) {
-        HRS = "R";
-        GEMProfix = "RGEM.rgems";
-    }
-
-
-    // read the Podd database file
-    ReadDatabase(HRS);
-
-    // search for the chambers
-    std::vector<Int_t> chamberIDList;
-    for (int i = 0; i <= 6; ++i) {
-        if (HRS == "R"){
-            if (chain->GetListOfBranches()->Contains(Form("RGEM.rgems.x%d.coord.pos",i))) chamberIDList.push_back(i);
-        }else{
-            if (chain->GetListOfBranches()->Contains(Form("LGEM.lgems.x%d.coord.pos",i))) chamberIDList.push_back(i);
-        }
-    }
-//#ifdef __DEBUG__
-     std::cout<<"--------> Scan Root Tree for GEM chambers <------------"<<std::endl;
-     for (auto chamberID : chamberIDList){
-         std::cout<<"ID "<<chamberID<<"  shift in DB: ("<<shiftbuffX[chamberID].X()<<","<<shiftbuffX[chamberID].Y()<<","<<shiftbuffX[chamberID].Z()<<")"<<std::endl;
-     }
-
-     std::vector<TString> treeBrachCheckArray;
-    {
-        treeBrachCheckArray.push_back(Form("%s.tr.x",HRS.Data()));
-        treeBrachCheckArray.push_back(Form("%s.tr.th",HRS.Data()));
-        treeBrachCheckArray.push_back(Form("%s.tr.y",HRS.Data()));
-        treeBrachCheckArray.push_back(Form("%s.tr.ph",HRS.Data()));
-        for (int i = 1; i<= 6; i++){
-            if (HRS=="R"){
-                treeBrachCheckArray.push_back(Form("RGEM.rgems.x%d.coord.pos",i));
-            } else{
-                treeBrachCheckArray.push_back(Form("LGEM.lgems.x%d.coord.pos",i));
-            }
-        }
-    }
-    for (auto str : treeBrachCheckArray) {
-        if (!chain->GetListOfBranches()->Contains(str.Data())){
-            std::cout<<"[ERROR]:: can NOT find banch "<< str.Data()<<std::endl;
-        }
-    }
-//#endif
-
-    TBranch        *b_Ndata_L_tr_x;   //!
-    TBranch        *b_L_tr_x;   //!
-    TBranch        *b_Ndata_L_tr_y;   //!
-    TBranch        *b_L_tr_y;   //!
-    TBranch        *b_Ndata_L_tr_th;   //!
-    TBranch        *b_L_tr_th;   //!
-    TBranch        *b_Ndata_L_tr_ph;   //!
-    TBranch        *b_L_tr_ph;   //!
-
-    TBranch        *b_Ndata_L_tr_d_x;   //!
-    TBranch        *b_L_tr_d_x;   //!
-    TBranch        *b_Ndata_L_tr_d_y;   //!
-    TBranch        *b_L_tr_d_y;   //!
-    TBranch        *b_Ndata_L_tr_d_ph;   //!
-    TBranch        *b_L_tr_d_ph;   //!
-    TBranch        *b_Ndata_L_tr_d_th;   //!
-    TBranch        *b_L_tr_d_th;   //!
-
-
-    Int_t           Ndata_L_tr_x=0;
-    Double_t        L_tr_x[6];   //[Ndata.L.tr.x]
-    Int_t           Ndata_L_tr_y=0;
-    Double_t        L_tr_y[6];   //[Ndata.L.tr.y]
-    Int_t           Ndata_L_tr_ph=0;
-    Double_t        L_tr_ph[6];   //[Ndata.L.tr.ph]
-    Int_t           Ndata_L_tr_th=0;
-    Double_t        L_tr_th[6];   //[Ndata.L.tr.th]
-
-    Int_t           Ndata_L_tr_d_x;
-    Double_t        L_tr_d_x[6];   //[Ndata.L.tr.d_x]
-    Int_t           Ndata_L_tr_d_y;
-    Double_t        L_tr_d_y[6];   //[Ndata.L.tr.d_y]
-    Int_t           Ndata_L_tr_d_th;
-    Double_t        L_tr_d_th[6];   //[Ndata.L.tr.d_th]
-    Int_t           Ndata_L_tr_d_ph;
-    Double_t        L_tr_d_ph[6];   //[Ndata.L.tr.d_ph]
-
-    chain->SetBranchAddress("Ndata.L.tr.x", &Ndata_L_tr_x, &b_Ndata_L_tr_x);
-    chain->SetBranchAddress("L.tr.x", L_tr_x, &b_L_tr_x);
-    chain->SetBranchAddress("Ndata.L.tr.y", &Ndata_L_tr_y, &b_Ndata_L_tr_y);
-    chain->SetBranchAddress("L.tr.y", L_tr_y, &b_L_tr_y);
-    chain->SetBranchAddress("Ndata.L.tr.th", &Ndata_L_tr_th, &b_Ndata_L_tr_th);
-    chain->SetBranchAddress("L.tr.th", L_tr_th, &b_L_tr_th);
-    chain->SetBranchAddress("Ndata.L.tr.ph", &Ndata_L_tr_ph, &b_Ndata_L_tr_ph);
-    chain->SetBranchAddress("L.tr.ph", L_tr_ph, &b_L_tr_ph);
-
-    chain->SetBranchAddress("Ndata.L.tr.d_ph", &Ndata_L_tr_d_ph, &b_Ndata_L_tr_d_ph);
-    chain->SetBranchAddress("L.tr.d_ph", L_tr_d_ph, &b_L_tr_d_ph);
-    chain->SetBranchAddress("Ndata.L.tr.d_th", &Ndata_L_tr_d_th, &b_Ndata_L_tr_d_th);
-    chain->SetBranchAddress("L.tr.d_th", L_tr_d_th, &b_L_tr_d_th);
-    chain->SetBranchAddress("Ndata.L.tr.d_x", &Ndata_L_tr_d_x, &b_Ndata_L_tr_d_x);
-    chain->SetBranchAddress("L.tr.d_x", L_tr_d_x, &b_L_tr_d_x);
-    chain->SetBranchAddress("Ndata.L.tr.d_y", &Ndata_L_tr_d_y, &b_Ndata_L_tr_d_y);
-    chain->SetBranchAddress("L.tr.d_y", L_tr_d_y, &b_L_tr_d_y);
-
-
-
-
-
-}
 
 float gemEstimateZ(TString fname,Int_t GEMID, float start=1.0, float  end=3.0){
     TChain *chain= new TChain("T");
@@ -353,6 +242,9 @@ float gemEstimateZ(TString fname,Int_t GEMID, float start=1.0, float  end=3.0){
     std::cout<<"Average ::"<<(centralXVal+centralYVal)/2.0<<std::endl;
     return (centralXVal+centralYVal)/2.0;
 }
+
+
+
 float gemEsitimatGEM1(TString fname){
     TChain *chain= new TChain("T");
     chain->Add(fname.Data());
@@ -379,7 +271,8 @@ float gemEsitimatGEM1(TString fname){
             if (chain->GetListOfBranches()->Contains(Form("LGEM.lgems.x%d.coord.pos",i))) chamberIDList.push_back(i);
         }
     }
-//#ifdef __DEBUG__
+
+    //#ifdef __DEBUG__
     std::cout<<"--------> Scan Root Tree for GEM chambers <------------"<<std::endl;
     for (auto chamberID : chamberIDList){
         std::cout<<"ID "<<chamberID<<"  shift in DB: ("<<shiftbuffX[chamberID].X()<<","<<shiftbuffX[chamberID].Y()<<","<<shiftbuffX[chamberID].Z()<<")"<<std::endl;
@@ -471,7 +364,9 @@ float gemEsitimatGEM1(TString fname){
 }
 void gemEstimator(TString fname){
 
-    float gem0Zpos=gemEsitimatGEM1(fname);
+    TString DBLoadPath="/home/newdriver/Storage/Research/PRex_GEM/PRex_Replay/PRex_Database/PRex_Database";
+    float gem0Zpos=0.0;
+            //gemEsitimatGEM1(fname);
 
     TChain *chain= new TChain("T");
     chain->Add(fname.Data());
@@ -487,7 +382,7 @@ void gemEstimator(TString fname){
 
 
     // read the Podd database file
-    ReadDatabase(HRS);
+    ReadDatabase(HRS,DBLoadPath.Data());
 
     // search for the chambers
     std::vector<Int_t> chamberIDList;
@@ -541,7 +436,7 @@ void gemEstimator(TString fname){
         std::cout<<__FUNCTION__ <<"("<<__LINE__<<") project histogram:"<< formStrX.Data()<<std::endl;
         std::cout<<__FUNCTION__ <<"("<<__LINE__<<") project histogram:"<< formStrY.Data()<<std::endl;
 
-        chain->Project(residualX->GetName(),formStrX.Data());
+        chain->Project(residualX->GetName(),formStrX.Data(),Form("%s.tr.x + %s.tr.th * (%f+%f) - %s.x%d.coord.pos !=0",HRS.Data(),HRS.Data(),shiftbuffX[chamberID].Z(),gem0Zpos,GEMProfix.Data(),chamberID));
         chain->Project(residualY->GetName(),formStrY.Data());
         gemResidualX[chamberID] = residualX;
         gemResidualY[chamberID] = residualY;
@@ -571,7 +466,7 @@ void gemEstimator(TString fname){
                 line->Draw("same");
                 TLatex *txt = new TLatex(fitFunc->GetParameter(1),fitFunc->GetParameter(0),Form("Mean : %f",fitFunc->GetParameter(1)));
                 txt->Draw("same");
-                residualRes[chamberID].SetX(shiftbuffX[chamberID].X()-fitFunc->GetParameter(1));
+                residualRes[chamberID].SetX(shiftbuffX[chamberID].X()+fitFunc->GetParameter(1));
             }
 
         }
@@ -599,7 +494,7 @@ void gemEstimator(TString fname){
                 line->Draw("same");
                 TLatex *txt = new TLatex(fitFunc->GetParameter(1),fitFunc->GetParameter(0),Form("Mean : %f",fitFunc->GetParameter(1)));
                 txt ->Draw("same");
-                residualRes[chamberID].SetY(shiftbuffX[chamberID].Y()-fitFunc->GetParameter(1));
+                residualRes[chamberID].SetY(shiftbuffX[chamberID].Y()+fitFunc->GetParameter(1));
             }
         }
     }
@@ -609,26 +504,46 @@ void gemEstimator(TString fname){
         residualRes[chamberID].SetZ(shiftbuffX[chamberID].Z()+gem0Zpos);
     }
 
+    std::cout<<"------------------------------------------------------"<<std::endl;
     for (auto  chamberID: chamberIDList){
-        std::cout<<"Chamber ID :"<<chamberID <<"  ("<<residualRes[chamberID].X()<<","<<residualRes[chamberID].Y()<<","<<residualRes[chamberID].Z()<<")"<<std::endl;
+        std::cout<<"Chamber ID :"<<chamberID <<"  ("<<residualRes[chamberID].X()<<"   "<<residualRes[chamberID].Y()<<"   "<<residualRes[chamberID].Z()<<")"<<std::endl;
     }
+    std::cout<<"Variable \tGEM1 \tGEM1 \tGEM2 \tGEM3 \tGEM4 \tGEM5 \tGEM6"<<std::endl;
+    std::cout<<"X";
+    for (auto  chamberID: chamberIDList){
+        std::cout<<",   "<<residualRes[chamberID].X();
+//        std::cout<<"Chamber ID :"<<chamberID <<"  ("<<residualRes[chamberID].X()<<"   "<<residualRes[chamberID].Y()<<"   "<<residualRes[chamberID].Z()<<")"<<std::endl;
+    }
+    std::cout<<std::endl;
+    std::cout<<"Y";
+    for (auto  chamberID: chamberIDList){
+        std::cout<<",   "<<residualRes[chamberID].Y();
+//        std::cout<<"Chamber ID :"<<chamberID <<"  ("<<residualRes[chamberID].X()<<"   "<<residualRes[chamberID].Y()<<"   "<<residualRes[chamberID].Z()<<")"<<std::endl;
+    }
+    std::cout<<std::endl;
+    std::cout<<"Z";
+    for (auto  chamberID: chamberIDList){
+        std::cout<<",   "<<residualRes[chamberID].Z();
+//        std::cout<<"Chamber ID :"<<chamberID <<"  ("<<residualRes[chamberID].X()<<"   "<<residualRes[chamberID].Y()<<"   "<<residualRes[chamberID].Z()<<")"<<std::endl;
+    }
+    std::cout<<std::endl;
 
 }
 
 
 void  tester_ReadGEMMap(){
-    ReadDatabase();
+    ReadDatabase("L");
 }
 
 void tester_main(){
-    gemEstimator("/home/newdriver/PRex_GEM/PRex_replayed/prexRHRS_21363*");
+    gemEstimator("/home/newdriver/PRex_GEM/PRex_replayed/prexLHRS_145*");
 }
 
 void testGetGEM1(){
-    gemEsitimatGEM1("/home/newdriver/PRex_GEM/PRex_replayed/prexRHRS_21363*");
+    gemEsitimatGEM1("/home/newdriver/PRex_GEM/PRex_replayed/prexLHRS_145*");
 }
 
 void testGetGEMZ(){
-    gemEstimateZ("/home/newdriver/PRex_GEM/PRex_replayed/prexRHRS_21363*",6,1.8,3.0);
+    gemEstimateZ("/home/newdriver/PRex_GEM/PRex_replayed/prexLHRS_145*",1,1.8,3.0);
 
 }

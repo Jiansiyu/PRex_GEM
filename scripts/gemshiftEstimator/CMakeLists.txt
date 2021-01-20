@@ -21,4 +21,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}")
 set(CMAKE_CXX_STANDARD 11)
 
 
-add_executable(runVerifier gemEstimator.C)
+add_executable(runVerifier gemEstimator.C rootReader2.C)

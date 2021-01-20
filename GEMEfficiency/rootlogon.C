@@ -1,0 +1,4 @@
+{
+	gROOT -> LoadMacro("gemPerformance.cxx");
+
+}

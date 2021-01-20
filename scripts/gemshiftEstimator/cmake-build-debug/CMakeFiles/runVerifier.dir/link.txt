@@ -1,1 +1,1 @@
-/usr/bin/c++   -pthread -std=c++11 -m64 -I/home/newdriver/Source/ROOT_CERN/root-6.14.04/root-6.14.04-install/include -g   CMakeFiles/runVerifier.dir/gemEstimator.C.o  -o runVerifier 
+/usr/bin/c++   -pthread -std=c++11 -m64 -I/home/newdriver/Source/ROOT_CERN/root-6.14.04/root-6.14.04-install/include -g   CMakeFiles/runVerifier.dir/gemEstimator.C.o CMakeFiles/runVerifier.dir/rootReader2.C.o  -o runVerifier 

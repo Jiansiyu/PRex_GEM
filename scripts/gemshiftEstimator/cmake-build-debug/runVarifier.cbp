@@ -89,6 +89,9 @@
 		<Unit filename="/home/newdriver/Storage/Research/PRex_GEM/scripts/gemshiftEstimator/gemEstimator.C">
 			<Option target="runVerifier"/>
 		</Unit>
+		<Unit filename="/home/newdriver/Storage/Research/PRex_GEM/scripts/gemshiftEstimator/rootReader2.C">
+			<Option target="runVerifier"/>
+		</Unit>
 		<Unit filename="/home/newdriver/Storage/Research/PRex_GEM/scripts/gemshiftEstimator/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>

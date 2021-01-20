@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/runVerifier.dir/gemEstimator.C.o"
+  "CMakeFiles/runVerifier.dir/rootReader2.C.o"
   "runVerifier"
   "runVerifier.pdb"
 )

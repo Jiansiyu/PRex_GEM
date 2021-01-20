@@ -34,5 +34,5 @@ if __name__ == '__main__':
 
     else:
         threadPool = Pool(max(multiprocessing.cpu_count(),8))
-        runIDs = [int(x) for x in sys.argv[1:] if unicode(x, 'utf-8').isnumeric()]
+        runIDs = [int(x) for x in sys.argv[1:] if str(x).isnumeric()]
         threadPool.map(run,runIDs)
