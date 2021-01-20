@@ -536,7 +536,7 @@ void  tester_ReadGEMMap(){
 }
 
 void tester_main(){
-    gemEstimator("/home/newdriver/PRex_GEM/PRex_replayed/prexLHRS_145*");
+    gemEstimator("/home/newdriver/PRex_GEM/PRex_replayed/prexLHRS_2148*");
 }
 
 void testGetGEM1(){
@@ -544,6 +544,6 @@ void testGetGEM1(){
 }
 
 void testGetGEMZ(){
-    gemEstimateZ("/home/newdriver/PRex_GEM/PRex_replayed/prexLHRS_145*",1,1.8,3.0);
+    gemEstimateZ("/home/newdriver/PRex_GEM/PRex_replayed/prexLHRS_2148_*",6,2.2,2.8);
 
 }

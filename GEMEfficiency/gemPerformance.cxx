@@ -886,7 +886,137 @@ void gemVDCTrackEfficiency(TString fname ="/home/newdriver/PRex/PRex_Data/GEMRoo
 
 ///
 /// \param fname
-void gemOnlyTrackEfficiency(TString fname ){
+void gemOnlyTrackEfficiency(TString fname="/home/newdriver/PRex_GEM/PRex_replayed/prexRHRS_21363_-1*",Double_t effSearchRange=0.02 ){
+    TChain *chain = new TChain("T");
+    chain -> Add(fname.Data());
+    Int_t runID = chain->GetMaximum("fEvtHdr.fRun");
+
+    TString HRS = "L";
+    TString GEMProfix = "LGEM.lgems";
+    if (runID>20000) {
+        HRS = "R";
+        GEMProfix = "RGEM.rgems";
+    }
+
+    // search for the chambers
+    std::vector<Int_t> chamberIDList;
+    for (int i = 0; i <= 6; ++i) {
+        if(chain->GetListOfBranches()->Contains(Form("%s.x%d.coord.pos",GEMProfix.Data(),i))){
+            chamberIDList.push_back(i);
+        }
+    }
+
+    assert(chamberIDList.size() > 0);
+    std::vector<TString>  treeBranchCheckArray;
+    {
+        treeBranchCheckArray.push_back(Form("%s.tr.x", HRS.Data()));
+        treeBranchCheckArray.push_back(Form("%s.tr.th", HRS.Data()));
+        treeBranchCheckArray.push_back(Form("%s.tr.y", HRS.Data()));
+        treeBranchCheckArray.push_back(Form("%s.tr.ph", HRS.Data()));
+
+        std::cout<<"------------------------------------------"<<std::endl;
+        for (auto chamberID : chamberIDList)
+            treeBranchCheckArray.push_back(Form("%s.x%d.coord.pos", GEMProfix.Data(), chamberID));
+
+
+        for (auto item : treeBranchCheckArray) {
+            if (!chain->GetListOfBranches()->Contains(item.Data())) {
+                std::cout << "[ERROR]:: can NOT find banch " << item.Data() << std::endl;
+                exit(-1);
+            } else {
+                std::cout << "Find Branch: " << item.Data() << std::endl;
+            }
+        }
+        std::cout<<"--------------------------end of branch check"<<std::endl;
+    }
+
+
+    std::map<Int_t, TH2F *> gemDetected2D;
+    std::map<Int_t, TH2F *> gemExpected2D;
+    std::map<Int_t, TH2F *> DetectedEfficiency2D;
+    std::string vdcPredicted2DPattern;
+    std::string gemDetected2DPattern;
+    // used for get the efficiency of the GEM only
+    for (auto chamberID : chamberIDList){
+        if (gemDetected2D.find(chamberID) == gemDetected2D.end()){
+            if (chamberID <= 3){
+                gemDetected2D[chamberID]=new TH2F(Form("gemDetected_ch%d",chamberID),Form("gemDetected_ch%d",chamberID),20,-0.05,0.05,40,-0.1,0.1);
+                gemExpected2D[chamberID]=new TH2F(Form("gemExpected_ch%d",chamberID),Form("gemExpected_ch%d",chamberID),20,-0.05,0.05,40,-0.1,0.1);
+            } else{
+                gemDetected2D[chamberID]=new TH2F(Form("gemDetected_ch%d",chamberID),Form("gemDetected_ch%d",chamberID),120,-0.3,0.3,100,-0.25,0.25);
+                gemExpected2D[chamberID]=new TH2F(Form("gemExpected_ch%d",chamberID),Form("gemExpected_ch%d",chamberID),120,-0.3,0.3,100,-0.25,0.25);
+            }
+        }
+
+        // project the  GEM detected position and the track position
+        TString gemTrackPos = Form("%s.y%d.coord.trkpos:%s.x%d.coord.trkpos",GEMProfix.Data(),chamberID,GEMProfix.Data(),chamberID);
+//        TString gemClusterPos =Form("%s.y%d.coord.pos:%s.x%d.coord.pos",GEMProfix.Data(),chamberID,GEMProfix.Data(),chamberID);
+        TString gemTrackPosCut = Form("sqrt( (%s.y%d.coord.trkpos - %s.y%d.coord.pos)*(%s.y%d.coord.trkpos - %s.y%d.coord.pos) + (%s.x%d.coord.trkpos - %s.x%d.coord.pos)*(%s.x%d.coord.trkpos - %s.x%d.coord.pos)) <=%f",
+                                      GEMProfix.Data(),chamberID,GEMProfix.Data(),chamberID,
+                                      GEMProfix.Data(),chamberID,GEMProfix.Data(),chamberID,
+                                      GEMProfix.Data(),chamberID,GEMProfix.Data(),chamberID,
+                                      GEMProfix.Data(),chamberID,GEMProfix.Data(),chamberID,effSearchRange);
+        chain->Project(gemDetected2D[chamberID]->GetName(),gemTrackPos.Data(),gemTrackPosCut.Data());
+        chain->Project(gemExpected2D[chamberID]->GetName(),gemTrackPos.Data());
+        DetectedEfficiency2D[chamberID]=(TH2F *) gemDetected2D[chamberID]->Clone(Form("gem_predict_ratio_%d",chamberID));
+    }
+
+
+
+    // the efficiency distribution of the detectors
+    std::map<Int_t,TH1F *> detEfficiencyDish;
+    std::map<Int_t,Int_t> gemEventCountList;
+    std::map<Int_t,Int_t> vdcProjEventCountList;
+
+    for (auto chamberID : chamberIDList){
+        Int_t gemEvent = 0;
+        Int_t vdcProjEvent = 0;
+        for (int i = 0; i < gemDetected2D[chamberID]->GetXaxis()->GetNbins();i++){
+            for (int j = 0; j < gemDetected2D[chamberID]->GetYaxis()->GetNbins(); j++){
+                if (gemDetected2D[chamberID]->GetBinContent(i,j) < 30){
+                    gemDetected2D[chamberID]->SetBinContent(i,j,0);
+                    gemExpected2D[chamberID]->SetBinContent(i,j,0);
+                } else{
+                    gemEvent += gemDetected2D[chamberID]->GetBinContent(i,j);
+                    vdcProjEvent += gemExpected2D[chamberID]->GetBinContent(i,j);
+
+                }
+            }
+        }
+        gemEventCountList[chamberID]=gemEvent;
+        vdcProjEventCountList[chamberID] = vdcProjEvent;
+        std::cout<<"ChamberID::"<<chamberID<<"   ->"<<float (float (gemEvent)/vdcProjEvent) <<" with ("<<gemEvent<<","<<vdcProjEvent<<")"<<std::endl;
+    }
+
+
+    TCanvas *canvas = new TCanvas("GEM Efficiency","GEM Efficiency",1960,1080);
+    canvas->Divide(3,chamberIDList.size());
+    canvas->Draw();
+    for (auto chamberID:chamberIDList) {
+        canvas->cd((chamberID-1)*3+1);
+        gemDetected2D[chamberID]->Draw("zcol");
+        canvas->cd((chamberID-1)*3+2);
+        gemExpected2D[chamberID]->Draw("zcol");
+
+        canvas->cd((chamberID-1)*3+3);
+        DetectedEfficiency2D[chamberID]->GetXaxis()->SetLabelSize(0.1);
+        DetectedEfficiency2D[chamberID]->GetYaxis()->SetLabelSize(0.1);
+        DetectedEfficiency2D[chamberID]->GetZaxis()->SetLabelSize(0.07);
+        DetectedEfficiency2D[chamberID]->Divide(gemExpected2D[chamberID]);
+        DetectedEfficiency2D[chamberID]->Draw("zcol");
+        float txtXpos = DetectedEfficiency2D[chamberID]->GetXaxis()->GetXmin() +0.1 *(DetectedEfficiency2D[chamberID]->GetXaxis()->GetXmax()-DetectedEfficiency2D[chamberID]->GetXaxis()->GetXmin());
+        float txtYpos = DetectedEfficiency2D[chamberID]->GetYaxis()->GetXmin() + 0.8 *(DetectedEfficiency2D[chamberID]->GetYaxis()->GetXmax()-DetectedEfficiency2D[chamberID]->GetYaxis()->GetXmin());
+        float overAlleff = 100*(double_t)(float (gemEventCountList[chamberID])/float (vdcProjEventCountList[chamberID]));
+        TLatex *pt = new TLatex(txtXpos,txtYpos,Form("GEM%d Eff=%1.1f%%",chamberID,overAlleff));
+        pt->SetTextSize(0.08);
+        pt->Draw("same");
+
+    }
+    canvas->Draw("same");
+
+
+
+
 
 }
 
