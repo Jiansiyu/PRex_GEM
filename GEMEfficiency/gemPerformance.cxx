@@ -21,6 +21,10 @@
 #include <TStyle.h>
 #include "TChain.h"
 #include "TLatex.h"
+#include "TVector3.h"
+#include "TSystem.h"
+#include "istream"
+#include "fstream"
 
 TTree *tree;
 // check the existance of the branch and attach to the data
@@ -82,6 +86,83 @@ std::vector<Int_t> gemGetDetectorList(TString fname){
 	DetList.push_back(5);
 	DetList.push_back(6);
 	return DetList;
+}
+
+
+std::map<int,TVector3> ReadDatabase(TString HRS = "R",TString DB_DIR="/home/newdriver/Storage/Research/PRex_GEM/PRex_Replay/PRex_Database/PRex_Database"){
+
+    std::cout<<"DB path "<< DB_DIR.Data()<<std::endl;
+
+    std::map<std::string,TString> dbbuff;
+    std::map<int,TVector3> shiftbuffX;
+    std::map<int,TVector3> shiftbuffY;
+
+    dbbuff.clear();
+    shiftbuffX.clear();
+    shiftbuffY.clear();
+
+    TString dbfname;
+    if (HRS == "R"){
+        dbfname =  Form("%s/db_RGEM.rgems.dat",DB_DIR.Data());
+    } else{
+        dbfname =  Form("%s/db_LGEM.lgems.dat",DB_DIR.Data());
+    }
+
+    if (gSystem->AccessPathName(dbfname.Data())){
+        std::cout<<"[ERROR]:: "<<"CAN NOT FIND DB  \""<<dbfname.Data()<<"\""<<std::endl;
+        exit(-1);
+    }
+    std::ifstream dbfileio(dbfname.Data(),std::ifstream::in);
+    std::string line;
+    while (getline(dbfileio,line)){
+        if (line[0] == '#' || line.empty()) continue;
+        auto delimiterPos = line.find("=");
+        auto name = line.substr(0, delimiterPos);
+        TString keyVal = name;
+        if (keyVal.Contains("position")){
+            auto value = line.substr(delimiterPos + 1);
+            name.erase(std::remove_if(name.begin(),name.end(),::isspace),name.end());
+            dbbuff[name] = value;
+        }
+    }
+
+    // parser the strings
+    for (int i = 1; i <= 6; i++){
+        // check the x and Y, make sure they agree with each other
+        // if not it will take the x value as the shift and throw and warning
+        TString nameTemplateX,nameTemplateY;
+        if (HRS == "R"){
+            nameTemplateX = Form("RGEM.rgems.x%d.position",i);
+            nameTemplateY = Form("RGEM.rgems.y%d.position",i);
+
+        } else{
+            nameTemplateX = Form("LGEM.lgems.x%d.position",i);
+            nameTemplateY = Form("LGEM.lgems.y%d.position",i);
+        }
+        //paser x
+        TVector3 x_shift(0,0,0),y_shift(0,0,0);
+        if (dbbuff.find(nameTemplateX.Data())!=dbbuff.end()){
+            std::istringstream value(dbbuff[nameTemplateX.Data()].Data());
+            double x=0,y=0,z=0;
+            value >> x;
+            value >> y;
+            value >> z;
+            x_shift.SetXYZ(x,y,z);
+        }
+        if (dbbuff.find(nameTemplateY.Data())!=dbbuff.end()){
+            std::istringstream value(dbbuff[nameTemplateY.Data()].Data());
+            double x=0,y=0,z=0;
+            value >> x;
+            value >> y;
+            value >> z;
+            y_shift.SetXYZ(x,y,z);
+        }
+//        x_shift.Print();
+//        y_shift.Print();
+        shiftbuffX[i] = x_shift;
+        shiftbuffY[i] = y_shift;
+    }
+    return shiftbuffX;
 }
 
 void gemNoiseSignalLevel(TString fname = "/home/newdriver/PRex/PRex_Data/GEMRootFile/prexRHRS_20862_00_test.root",std::string HRS="RHRS"){
@@ -774,8 +855,8 @@ void gemVDCTrackEfficiency(TString fname ="/home/newdriver/PRex/PRex_Data/GEMRoo
                 gemDetected2D[chamberID]=new TH2F(Form("gemDetected_ch%d",chamberID),Form("gemDetected_ch%d",chamberID),20,-0.05,0.05,40,-0.1,0.1);
 
             }else{
-                vdcPredicted2D[chamberID]=new TH2F(Form("vdcPredicted_ch%d",chamberID),Form("vdcPredicted_ch%d",chamberID),120,-0.3,0.3,100,-0.25,0.25);
-                gemDetected2D[chamberID]=new TH2F(Form("gemDetected_ch%d",chamberID),Form("gemDetected_ch%d",chamberID),120,-0.3,0.3,100,-0.25,0.25);
+                vdcPredicted2D[chamberID]=new TH2F(Form("vdcPredicted_ch%d",chamberID),Form("vdcPredicted_ch%d",chamberID),120,-0.3,0.3,100,-0.3,0.3);
+                gemDetected2D[chamberID]=new TH2F(Form("gemDetected_ch%d",chamberID),Form("gemDetected_ch%d",chamberID),120,-0.3,0.3,100,-0.3,0.3);
             }
         }
         std::string boundaryCut =
@@ -898,6 +979,7 @@ void gemOnlyTrackEfficiency(TString fname="/home/newdriver/PRex_GEM/PRex_replaye
         GEMProfix = "RGEM.rgems";
     }
 
+    auto GEMPosition = ReadDatabase(HRS.Data());
     // search for the chambers
     std::vector<Int_t> chamberIDList;
     for (int i = 0; i <= 6; ++i) {
@@ -948,22 +1030,90 @@ void gemOnlyTrackEfficiency(TString fname="/home/newdriver/PRex_GEM/PRex_replaye
             }
         }
 
-        // project the  GEM detected position and the track position
-        TString gemTrackPos = Form("%s.y%d.coord.trkpos:%s.x%d.coord.trkpos",GEMProfix.Data(),chamberID,GEMProfix.Data(),chamberID);
-//        TString gemClusterPos =Form("%s.y%d.coord.pos:%s.x%d.coord.pos",GEMProfix.Data(),chamberID,GEMProfix.Data(),chamberID);
-        TString gemTrackPosCut = Form("sqrt( (%s.y%d.coord.trkpos - %s.y%d.coord.pos)*(%s.y%d.coord.trkpos - %s.y%d.coord.pos) + (%s.x%d.coord.trkpos - %s.x%d.coord.pos)*(%s.x%d.coord.trkpos - %s.x%d.coord.pos)) <=%f",
-                                      GEMProfix.Data(),chamberID,GEMProfix.Data(),chamberID,
-                                      GEMProfix.Data(),chamberID,GEMProfix.Data(),chamberID,
-                                      GEMProfix.Data(),chamberID,GEMProfix.Data(),chamberID,
-                                      GEMProfix.Data(),chamberID,GEMProfix.Data(),chamberID,effSearchRange);
-        chain->Project(gemDetected2D[chamberID]->GetName(),gemTrackPos.Data(),gemTrackPosCut.Data());
-        chain->Project(gemExpected2D[chamberID]->GetName(),gemTrackPos.Data());
-        DetectedEfficiency2D[chamberID]=(TH2F *) gemDetected2D[chamberID]->Clone(Form("gem_predict_ratio_%d",chamberID));
     }
 
+    Int_t           Ndata_GEM_X_coord_pos[7];
+    Double_t        GEM_X_coord_pos[7][2];   //[Ndata.RGEM.rgems.x1.coord.pos]
+    Int_t           Ndata_GEM_Y_coord_pos[7];
+    Double_t        GEM_Y_coord_pos[7][2];   //[Ndata.RGEM.rgems.x1.coord.pos]
 
+    Int_t           Ndata_GEM_X_coord_trkpos[7];
+    Double_t        GEM_X_coord_trkpos[7][2];
+    Int_t           Ndata_GEM_X_coord_trkslope[7];
+    Double_t        GEM_X_coord_trkslope[7][2];   //[Ndata.RGEM.rgems.x1.coord.trkslope]
+
+    Int_t           Ndata_GEM_Y_coord_trkpos[7];
+    Double_t        GEM_Y_coord_trkpos[7][2];
+    Int_t           Ndata_GEM_Y_coord_trkslope[7];
+    Double_t        GEM_Y_coord_trkslope[7][2];   //[Ndata.RGEM.rgems.x1.coord.trkslope]
+    for (auto chamberID: chamberIDList){
+        TString  Ndata_GEM_X_coord_pos_str(Form("Ndata.%s.x%d.coord.pos",GEMProfix.Data(),chamberID));
+        TString  GEM_X_coord_pos_str(Form("%s.x%d.coord.pos",GEMProfix.Data(),chamberID));   //[Ndata.RGEM.rgems.x1.coord.pos]
+        TString  Ndata_GEM_Y_coord_pos_str(Form("Ndata.%s.y%d.coord.pos",GEMProfix.Data(),chamberID));
+        TString  GEM_Y_coord_pos_str(Form("%s.y%d.coord.pos",GEMProfix.Data(),chamberID));   //[Ndata.RGEM.rgems.x1.coord.pos]
+
+        TString Ndata_GEM_X_coord_trkpos_str(Form("Ndata.%s.x%d.coord.trkpos",GEMProfix.Data(),chamberID));
+        TString GEM_X_coord_trkpos_str(Form("%s.x%d.coord.trkpos",GEMProfix.Data(),chamberID));
+        TString Ndata_GEM_X_coord_trkslope_str(Form("Ndata.%s.x%d.coord.trkslope",GEMProfix.Data(),chamberID));
+        TString GEM_X_coord_trkslope_str(Form("%s.x%d.coord.trkslope",GEMProfix.Data(),chamberID));
+
+        chain->SetBranchAddress(Ndata_GEM_X_coord_trkpos_str.Data(),&Ndata_GEM_X_coord_trkpos[chamberID]);
+        chain->SetBranchAddress(GEM_X_coord_trkpos_str.Data(),GEM_X_coord_trkpos[chamberID]);
+        chain->SetBranchAddress(Ndata_GEM_X_coord_trkslope_str.Data(),&Ndata_GEM_X_coord_trkslope[chamberID]);
+        chain->SetBranchAddress(GEM_X_coord_trkslope_str.Data(),GEM_X_coord_trkslope[chamberID]);
+
+        TString Ndata_GEM_Y_coord_trkpos_str(Form("Ndata.%s.y%d.coord.trkpos",GEMProfix.Data(),chamberID));
+        TString GEM_Y_coord_trkpos_str(Form("%s.y%d.coord.trkpos",GEMProfix.Data(),chamberID));
+        TString Ndata_GEM_Y_coord_trkslope_str(Form("Ndata.%s.y%d.coord.trkslope",GEMProfix.Data(),chamberID));
+        TString GEM_Y_coord_trkslope_str(Form("%s.y%d.coord.trkslope",GEMProfix.Data(),chamberID));
+
+        chain->SetBranchAddress(Ndata_GEM_Y_coord_trkpos_str.Data(),&Ndata_GEM_Y_coord_trkpos[chamberID]);
+        chain->SetBranchAddress(GEM_Y_coord_trkpos_str.Data(),GEM_Y_coord_trkpos[chamberID]);
+        chain->SetBranchAddress(Ndata_GEM_Y_coord_trkslope_str.Data(),&Ndata_GEM_Y_coord_trkslope[chamberID]);
+        chain->SetBranchAddress(GEM_Y_coord_trkslope_str.Data(),GEM_Y_coord_trkslope[chamberID]);
+    }
+
+    Long64_t entries = chain->GetEntries();
+    for (Long64_t entry = 0; entry < chain->GetEntries(); entry++){
+        chain->GetEntry(entry);
+        if (entry%1000==0)std::cout<<"\t"<<entry<<"/"<<entries<<std::endl;
+        int sum = 0;
+        for (int i = 1 ; i < 7 ; i ++){
+            sum += Ndata_GEM_X_coord_trkpos[i] + Ndata_GEM_Y_coord_trkpos[i];
+        }
+//        for (auto chamberID:chamberIDList){
+//            if (Ndata_GEM_X_coord_trkpos[chamberID]>0 and Ndata_GEM_Y_coord_trkpos[chamberID] > 0){
+//                std::cout<<"\t"<<"chamberID :"<< chamberID<<"   ("<<GEM_X_coord_trkpos[chamberID][0]<<","<<GEM_Y_coord_trkpos[chamberID][0]<<")"<<
+//                "   slop :("<<GEM_X_coord_trkslope[chamberID][0]<<","<<GEM_Y_coord_trkslope[chamberID][0]<<")"<<
+//                "Project::("<<GEM_X_coord_trkpos[1][0]+GEM_X_coord_trkslope[chamberID][0]*(GEMPosition[chamberID].Z()-GEMPosition[1].z())<<","<<
+//                GEM_Y_coord_trkpos[1][0] + GEM_Y_coord_trkslope[chamberID][0]*(GEMPosition[chamberID].Z()-GEMPosition[1].Z())<<")"<<std::endl;
+//            }
+//        }
+//        getchar();
+        if (sum > 0){
+            // read the GEM detectors
+            for (auto chamberID : chamberIDList){
+                if (Ndata_GEM_X_coord_trkpos[chamberID]!=0 and Ndata_GEM_Y_coord_trkpos[chamberID]!=0 ){
+                    gemExpected2D[chamberID]->Fill(GEM_X_coord_trkpos[chamberID][0],GEM_Y_coord_trkpos[chamberID][0]);
+                    gemDetected2D[chamberID]->Fill(GEM_X_coord_trkpos[chamberID][0],GEM_Y_coord_trkpos[chamberID][0]);
+                }else{
+                    // this means no event detected, need to push the value to the GEM detectors
+                    for (auto tempChamberID : chamberIDList){
+                        if (Ndata_GEM_X_coord_trkpos[tempChamberID] > 0 and Ndata_GEM_Y_coord_trkpos[tempChamberID] > 0){
+                            double_t projectedX = GEM_X_coord_trkpos[tempChamberID][0] + GEM_X_coord_trkslope[tempChamberID][0]*(GEMPosition[chamberID].Z()-GEMPosition[tempChamberID].Z());
+                            double_t projectedY = GEM_Y_coord_trkpos[tempChamberID][0] + GEM_Y_coord_trkslope[tempChamberID][0]*(GEMPosition[chamberID].Z()-GEMPosition[tempChamberID].Z());
+                            gemExpected2D[chamberID]->Fill(projectedX,projectedY);
+//                            if (Ndata_GEM_X_coord_pos[chamberID] > 0 and Ndata_GEM_Y_coord_pos[chamberID]) std::cout<<"Expected at ("<<projectedX<<","<<projectedY<<")\t("<<GEM_X_coord_pos[chamberID][0]<<
+//                            ","<<GEM_Y_coord_pos[chamberID][0]<<")"<<std::endl;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     // the efficiency distribution of the detectors
+
     std::map<Int_t,TH1F *> detEfficiencyDish;
     std::map<Int_t,Int_t> gemEventCountList;
     std::map<Int_t,Int_t> vdcProjEventCountList;
@@ -973,7 +1123,7 @@ void gemOnlyTrackEfficiency(TString fname="/home/newdriver/PRex_GEM/PRex_replaye
         Int_t vdcProjEvent = 0;
         for (int i = 0; i < gemDetected2D[chamberID]->GetXaxis()->GetNbins();i++){
             for (int j = 0; j < gemDetected2D[chamberID]->GetYaxis()->GetNbins(); j++){
-                if (gemDetected2D[chamberID]->GetBinContent(i,j) < 30){
+                if (gemDetected2D[chamberID]->GetBinContent(i,j) < 15){
                     gemDetected2D[chamberID]->SetBinContent(i,j,0);
                     gemExpected2D[chamberID]->SetBinContent(i,j,0);
                 } else{
@@ -986,6 +1136,7 @@ void gemOnlyTrackEfficiency(TString fname="/home/newdriver/PRex_GEM/PRex_replaye
         gemEventCountList[chamberID]=gemEvent;
         vdcProjEventCountList[chamberID] = vdcProjEvent;
         std::cout<<"ChamberID::"<<chamberID<<"   ->"<<float (float (gemEvent)/vdcProjEvent) <<" with ("<<gemEvent<<","<<vdcProjEvent<<")"<<std::endl;
+        DetectedEfficiency2D[chamberID]=(TH2F *) gemDetected2D[chamberID]->Clone(Form("gem_predict_ratio_%d",chamberID));
     }
 
 
@@ -1013,10 +1164,7 @@ void gemOnlyTrackEfficiency(TString fname="/home/newdriver/PRex_GEM/PRex_replaye
 
     }
     canvas->Draw("same");
-
-
-
-
+    canvas->SaveAs(Form("%sHRS_%d_efficiency.png",HRS.Data(),runID));
 
 }
 
