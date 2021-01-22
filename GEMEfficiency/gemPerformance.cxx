@@ -929,51 +929,51 @@ void gemVDCTrackEfficiency2(TString fname ="/home/newdriver/PRex/PRex_Data/GEMRo
     double_t vdcTrPH[2000];
     double_t vdcTrTH[2000];
 
-    if(tree->GetListOfBranches()->Contains(NDatavdcTrX_str.c_str())){
-        tree->SetBranchAddress(NDatavdcTrX_str.c_str(),&NDatavdcTrX);
+    if(chain->GetListOfBranches()->Contains(NDatavdcTrX_str.c_str())){
+        chain->SetBranchAddress(NDatavdcTrX_str.c_str(),&NDatavdcTrX);
     }else{
         std::cout<<"[WORNING]:: "<< NDatavdcTrX_str.c_str()<<" cannot find!!"<<std::endl;
     }
 
-    if(tree->GetListOfBranches()->Contains(NDatavdcTrY_str.c_str())){
-        tree->SetBranchAddress(NDatavdcTrY_str.c_str(),&NDatavdcTrY);
+    if(chain->GetListOfBranches()->Contains(NDatavdcTrY_str.c_str())){
+        chain->SetBranchAddress(NDatavdcTrY_str.c_str(),&NDatavdcTrY);
     }else{
         std::cout<<"[WORNING]:: "<< NDatavdcTrY_str.c_str()<<" cannot find!!"<<std::endl;
     }
 
-    if(tree->GetListOfBranches()->Contains(NDatavdcTrTH_str.c_str())){
-        tree->SetBranchAddress(NDatavdcTrTH_str.c_str(),&NDatavdcTrTH);
+    if(chain->GetListOfBranches()->Contains(NDatavdcTrTH_str.c_str())){
+        chain->SetBranchAddress(NDatavdcTrTH_str.c_str(),&NDatavdcTrTH);
     }else{
         std::cout<<"[WORNING]:: "<< NDatavdcTrTH_str.c_str()<<" cannot find!!"<<std::endl;
     }
 
-    if(tree->GetListOfBranches()->Contains(NDatavdcTrPH_str.c_str())){
-        tree->SetBranchAddress(NDatavdcTrPH_str.c_str(),&NDatavdcTrPH);
+    if(chain->GetListOfBranches()->Contains(NDatavdcTrPH_str.c_str())){
+        chain->SetBranchAddress(NDatavdcTrPH_str.c_str(),&NDatavdcTrPH);
     }else{
         std::cout<<"[WORNING]:: "<< NDatavdcTrPH_str.c_str()<<" cannot find!!"<<std::endl;
     }
 
     // load the x y th ph value
-    if (tree->GetListOfBranches()->Contains(vdcTrX_str.c_str())) {
-        tree->SetBranchAddress(vdcTrX_str.c_str(), vdcTrX);
+    if (chain->GetListOfBranches()->Contains(vdcTrX_str.c_str())) {
+        chain->SetBranchAddress(vdcTrX_str.c_str(), vdcTrX);
     } else {
         std::cout << "[WORNING]:: " << vdcTrX_str.c_str() << " cannot find!!"<< std::endl;
     }
     // load the x y th ph value
-    if (tree->GetListOfBranches()->Contains(vdcTrY_str.c_str())) {
-        tree->SetBranchAddress(vdcTrY_str.c_str(), vdcTrY);
+    if (chain->GetListOfBranches()->Contains(vdcTrY_str.c_str())) {
+        chain->SetBranchAddress(vdcTrY_str.c_str(), vdcTrY);
     } else {
         std::cout << "[WORNING]:: " << vdcTrY_str.c_str() << " cannot find!!"<< std::endl;
     }
 
-    if (tree->GetListOfBranches()->Contains(vdcTrPH_str.c_str())) {
-        tree->SetBranchAddress(vdcTrPH_str.c_str(), vdcTrPH);
+    if (chain->GetListOfBranches()->Contains(vdcTrPH_str.c_str())) {
+        chain->SetBranchAddress(vdcTrPH_str.c_str(), vdcTrPH);
     } else {
         std::cout << "[WORNING]:: " << vdcTrPH_str.c_str() << " cannot find!!"<< std::endl;
     }
     // load the x y th ph value
-    if (tree->GetListOfBranches()->Contains(vdcTrTH_str.c_str())) {
-        tree->SetBranchAddress(vdcTrTH_str.c_str(), vdcTrTH);
+    if (chain->GetListOfBranches()->Contains(vdcTrTH_str.c_str())) {
+        chain->SetBranchAddress(vdcTrTH_str.c_str(), vdcTrTH);
     } else {
         std::cout << "[WORNING]:: " << vdcTrTH_str.c_str() << " cannot find!!"<< std::endl;
     }
