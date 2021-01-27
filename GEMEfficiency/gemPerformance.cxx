@@ -1419,6 +1419,283 @@ float gemOnlyTrackEfficiency(TString fname="/home/newdriver/PRex_GEM/PRex_replay
     return  effRes[1];
 }
 
+
+///The ratio of the GEM track and the VDC track
+/// \param fname
+void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/prexRHRS_20862_00_test.root"){
+
+    TChain *chain = new TChain("T");
+    chain -> Add(fname.Data());
+    Int_t runID = chain->GetMaximum("fEvtHdr.fRun");
+
+    TString HRS = "L";
+    TString GEMProfix = "LGEM.lgems";
+    if (runID>20000) {
+        HRS = "R";
+        GEMProfix = "RGEM.rgems";
+    }
+
+    double_t zpos[]={0,1.07093,   1.75673,   1.95993,   2.40013,   2.51523,   2.61068};
+    double_t xMinCut[]={0.0,  -0.0594110320,  -0.0549617020,  -0.0534276410,   -0.46155132,  -0.46307054,  -0.46354599  };
+    double_t xMaxCut[]={0.0,   0.040588968,    0.045038298,    0.046572359,     0.13844868,   0.13692946,   0.13645401  };
+    double_t yMinCut[]={0.0,  -0.096555290,   -0.091156590,   -0.089864033,    -0.27825711,  -0.27738908,  -0.22982879 };
+    double_t yMaxCut[]={0.0,   0.1034447100,   0.10884341,     0.11013597,      0.22174289,   0.22261092,   0.27017121 };
+
+    // read the database, and change the cut
+
+
+    auto GEMPosition = ReadDatabase(HRS.Data());
+    std::vector<Int_t> chamberIDList;
+    for (int i = 0; i <= 6; ++i) {
+        if(chain->GetListOfBranches()->Contains(Form("%s.x%d.coord.pos",GEMProfix.Data(),i))){
+            chamberIDList.push_back(i);
+        }
+    }
+
+    std::vector<TString>  treeBranchCheckArray;
+    {
+        treeBranchCheckArray.push_back(Form("%s.tr.x", HRS.Data()));
+        treeBranchCheckArray.push_back(Form("%s.tr.th", HRS.Data()));
+        treeBranchCheckArray.push_back(Form("%s.tr.y", HRS.Data()));
+        treeBranchCheckArray.push_back(Form("%s.tr.ph", HRS.Data()));
+        std::cout<<"------------------------------------------"<<std::endl;
+        for (auto chamberID : chamberIDList)
+            treeBranchCheckArray.push_back(Form("%s.x%d.coord.pos", GEMProfix.Data(), chamberID));
+
+
+        for (auto item : treeBranchCheckArray) {
+            if (!chain->GetListOfBranches()->Contains(item.Data())) {
+                std::cout << "[ERROR]:: can NOT find banch " << item.Data() << std::endl;
+                exit(-1);
+            } else {
+                std::cout << "Find Branch: " << item.Data() << std::endl;
+            }
+        }
+        std::cout<<"--------------------------end of branch check"<<std::endl;
+    }
+    // get the vdc traks
+    std::string NDatavdcTrX_str(Form("Ndata.%s.tr.x",HRS.Data()));
+    std::string NDatavdcTrY_str(Form("Ndata.%s.tr.y",HRS.Data()));
+    std::string NDatavdcTrTH_str(Form("Ndata.%s.tr.th",HRS.Data()));
+    std::string NDatavdcTrPH_str(Form("Ndata.%s.tr.ph",HRS.Data()));
+
+    std::string vdcTrX_str(Form("%s.tr.x",HRS.Data()));
+    std::string vdcTrY_str(Form("%s.tr.y",HRS.Data()));
+    std::string vdcTrTH_str(Form("%s.tr.th",HRS.Data()));
+    std::string vdcTrPH_str(Form("%s.tr.ph",HRS.Data()));
+
+    Int_t NDatavdcTrX;
+    Int_t NDatavdcTrY;
+    Int_t NDatavdcTrTH;
+    Int_t NDatavdcTrPH;
+
+    double_t vdcTrX[2000];
+    double_t vdcTrY[2000];
+    double_t vdcTrPH[2000];
+    double_t vdcTrTH[2000];
+
+    if(chain->GetListOfBranches()->Contains(NDatavdcTrX_str.c_str())){
+        chain->SetBranchAddress(NDatavdcTrX_str.c_str(),&NDatavdcTrX);
+    }else{
+        std::cout<<"[WORNING]:: "<< NDatavdcTrX_str.c_str()<<" cannot find!!"<<std::endl;
+    }
+
+    if(chain->GetListOfBranches()->Contains(NDatavdcTrY_str.c_str())){
+        chain->SetBranchAddress(NDatavdcTrY_str.c_str(),&NDatavdcTrY);
+    }else{
+        std::cout<<"[WORNING]:: "<< NDatavdcTrY_str.c_str()<<" cannot find!!"<<std::endl;
+    }
+
+    if(chain->GetListOfBranches()->Contains(NDatavdcTrTH_str.c_str())){
+        chain->SetBranchAddress(NDatavdcTrTH_str.c_str(),&NDatavdcTrTH);
+    }else{
+        std::cout<<"[WORNING]:: "<< NDatavdcTrTH_str.c_str()<<" cannot find!!"<<std::endl;
+    }
+
+    if(chain->GetListOfBranches()->Contains(NDatavdcTrPH_str.c_str())){
+        chain->SetBranchAddress(NDatavdcTrPH_str.c_str(),&NDatavdcTrPH);
+    }else{
+        std::cout<<"[WORNING]:: "<< NDatavdcTrPH_str.c_str()<<" cannot find!!"<<std::endl;
+    }
+
+    // load the x y th ph value
+    if (chain->GetListOfBranches()->Contains(vdcTrX_str.c_str())) {
+        chain->SetBranchAddress(vdcTrX_str.c_str(), vdcTrX);
+    } else {
+        std::cout << "[WORNING]:: " << vdcTrX_str.c_str() << " cannot find!!"<< std::endl;
+    }
+    // load the x y th ph value
+    if (chain->GetListOfBranches()->Contains(vdcTrY_str.c_str())) {
+        chain->SetBranchAddress(vdcTrY_str.c_str(), vdcTrY);
+    } else {
+        std::cout << "[WORNING]:: " << vdcTrY_str.c_str() << " cannot find!!"<< std::endl;
+    }
+
+    if (chain->GetListOfBranches()->Contains(vdcTrPH_str.c_str())) {
+        chain->SetBranchAddress(vdcTrPH_str.c_str(), vdcTrPH);
+    } else {
+        std::cout << "[WORNING]:: " << vdcTrPH_str.c_str() << " cannot find!!"<< std::endl;
+    }
+    // load the x y th ph value
+    if (chain->GetListOfBranches()->Contains(vdcTrTH_str.c_str())) {
+        chain->SetBranchAddress(vdcTrTH_str.c_str(), vdcTrTH);
+    } else {
+        std::cout << "[WORNING]:: " << vdcTrTH_str.c_str() << " cannot find!!"<< std::endl;
+    }
+
+    Int_t           Ndata_GEM_X_coord_pos[7];
+    Double_t        GEM_X_coord_pos[7][2];   //[Ndata.RGEM.rgems.x1.coord.pos]
+    Int_t           Ndata_GEM_Y_coord_pos[7];
+    Double_t        GEM_Y_coord_pos[7][2];   //[Ndata.RGEM.rgems.x1.coord.pos]
+
+    Int_t           Ndata_GEM_X_coord_trkpos[7];
+    Double_t        GEM_X_coord_trkpos[7][2];
+    Int_t           Ndata_GEM_X_coord_trkslope[7];
+    Double_t        GEM_X_coord_trkslope[7][2];   //[Ndata.RGEM.rgems.x1.coord.trkslope]
+
+    Int_t           Ndata_GEM_Y_coord_trkpos[7];
+    Double_t        GEM_Y_coord_trkpos[7][2];
+    Int_t           Ndata_GEM_Y_coord_trkslope[7];
+    Double_t        GEM_Y_coord_trkslope[7][2];   //[Ndata.RGEM.rgems.x1.coord.trkslope]
+
+    for (auto chamberID: chamberIDList){
+        TString  Ndata_GEM_X_coord_pos_str(Form("Ndata.%s.x%d.coord.pos",GEMProfix.Data(),chamberID));
+        TString  GEM_X_coord_pos_str(Form("%s.x%d.coord.pos",GEMProfix.Data(),chamberID));   //[Ndata.RGEM.rgems.x1.coord.pos]
+        TString  Ndata_GEM_Y_coord_pos_str(Form("Ndata.%s.y%d.coord.pos",GEMProfix.Data(),chamberID));
+        TString  GEM_Y_coord_pos_str(Form("%s.y%d.coord.pos",GEMProfix.Data(),chamberID));   //[Ndata.RGEM.rgems.x1.coord.pos]
+
+        TString Ndata_GEM_X_coord_trkpos_str(Form("Ndata.%s.x%d.coord.trkpos",GEMProfix.Data(),chamberID));
+        TString GEM_X_coord_trkpos_str(Form("%s.x%d.coord.trkpos",GEMProfix.Data(),chamberID));
+        TString Ndata_GEM_X_coord_trkslope_str(Form("Ndata.%s.x%d.coord.trkslope",GEMProfix.Data(),chamberID));
+        TString GEM_X_coord_trkslope_str(Form("%s.x%d.coord.trkslope",GEMProfix.Data(),chamberID));
+
+        chain->SetBranchAddress(Ndata_GEM_X_coord_trkpos_str.Data(),&Ndata_GEM_X_coord_trkpos[chamberID]);
+        chain->SetBranchAddress(GEM_X_coord_trkpos_str.Data(),GEM_X_coord_trkpos[chamberID]);
+        chain->SetBranchAddress(Ndata_GEM_X_coord_trkslope_str.Data(),&Ndata_GEM_X_coord_trkslope[chamberID]);
+        chain->SetBranchAddress(GEM_X_coord_trkslope_str.Data(),GEM_X_coord_trkslope[chamberID]);
+
+        TString Ndata_GEM_Y_coord_trkpos_str(Form("Ndata.%s.y%d.coord.trkpos",GEMProfix.Data(),chamberID));
+        TString GEM_Y_coord_trkpos_str(Form("%s.y%d.coord.trkpos",GEMProfix.Data(),chamberID));
+        TString Ndata_GEM_Y_coord_trkslope_str(Form("Ndata.%s.y%d.coord.trkslope",GEMProfix.Data(),chamberID));
+        TString GEM_Y_coord_trkslope_str(Form("%s.y%d.coord.trkslope",GEMProfix.Data(),chamberID));
+
+        chain->SetBranchAddress(Ndata_GEM_Y_coord_trkpos_str.Data(),&Ndata_GEM_Y_coord_trkpos[chamberID]);
+        chain->SetBranchAddress(GEM_Y_coord_trkpos_str.Data(),GEM_Y_coord_trkpos[chamberID]);
+        chain->SetBranchAddress(Ndata_GEM_Y_coord_trkslope_str.Data(),&Ndata_GEM_Y_coord_trkslope[chamberID]);
+        chain->SetBranchAddress(GEM_Y_coord_trkslope_str.Data(),GEM_Y_coord_trkslope[chamberID]);
+    }
+
+    TH2F * vdcCluster2D;
+    std::map<Int_t,TH2F *> gemTrackCluster2D;
+    TH1F *gemNChamberTrack; // number of GEMs get hit in a track
+    TH1F * gemModuleNChamberTrackRatio;
+    {
+     vdcCluster2D = new TH2F(Form("%d vdc Tr.x vs. y",runID),Form("%d vdc Tr.x vs. y",runID),1000,-0.05,-0.05,1000,-0.05,0.05);
+        for (auto chamberID : chamberIDList){
+            if(chamberID<=3){
+                gemTrackCluster2D[chamberID]=new TH2F(Form("gemDetected_ch%d",chamberID),Form("gemDetected_ch%d",chamberID),20,-0.05,0.05,40,-0.1,0.1);
+
+            }else{
+                gemTrackCluster2D[chamberID]=new TH2F(Form("gemDetected_ch%d",chamberID),Form("gemDetected_ch%d",chamberID),120,-0.3,0.3,100,-0.25,0.25);
+            }
+        }
+        gemNChamberTrack = new TH1F(Form("gem # hit in track %d",runID),Form("gem # hit in track %d",runID),10,0,10);
+
+        gemModuleNChamberTrackRatio = new TH1F(Form("Efficiency of GEM %d",runID),Form("\"Efficiency\" of GEM %d",runID),8,0,8);
+    }
+
+
+
+    double gemTrackCount = 0.0;
+    double vdcTrackCount = 0.0;
+    std::map<Int_t, double> gemChamberTrackCount;
+
+    for (auto chamberID:chamberIDList) gemChamberTrackCount[chamberID] = 0.0;
+
+    Long64_t entries = chain->GetEntries();
+    for (Long64_t entry = 0; entry < entries; entry ++ ){
+        chain->GetEntry(entry);
+
+        if (entry%100==0 ) {
+            MemInfo_t memInfo;
+            CpuInfo_t cpuInfo;
+            gSystem->GetMemInfo(&memInfo);
+            std::cout<<"\x1B[s"<<Form("\tProgress %2.1f",(double)entry*100/entries)<<"%" <<" /"<<Form("RAM:%6d KB",memInfo.fMemUsed)<<"\x1B[u" << std::flush;
+        }
+
+        //TODO check the vdc us with in the range of the detectors
+        //calculate filter the event within the range
+
+
+        // get the vdc Track
+        if (NDatavdcTrY > 0 && NDatavdcTrX > 0 && NDatavdcTrPH >0 && NDatavdcTrTH > 0){
+
+            Bool_t eventCutFlag = true;
+            for(auto  chamberID : chamberIDList){
+                double vdcProjectedX = vdcTrX[0] + zpos[chamberID]*vdcTrTH[0];
+                double vdcProjectedY = vdcTrY[0] + zpos[chamberID]*vdcTrPH[0];
+
+                if (vdcProjectedX > xMaxCut[chamberID] || vdcProjectedX < xMinCut[chamberID] || vdcProjectedY > yMaxCut[chamberID] || vdcProjectedY < yMinCut[chamberID]){
+                    eventCutFlag = false;
+                }
+            }
+
+            if (eventCutFlag){
+                vdcTrackCount = vdcTrackCount + 1.0;
+                // get the GEM track
+                Int_t trackNumberX = 0 ;
+                Int_t trackNumberY = 0 ;
+                for(auto chamberID: chamberIDList){
+
+                    trackNumberX += Ndata_GEM_X_coord_trkpos[chamberID];
+                    trackNumberY += Ndata_GEM_Y_coord_trkpos[chamberID];
+                    if (Ndata_GEM_X_coord_trkpos[chamberID] > 0 &&  Ndata_GEM_Y_coord_trkpos[chamberID]>0)
+                        gemChamberTrackCount[chamberID] = gemChamberTrackCount[chamberID] + 1.0;
+                }
+                if (trackNumberX > 0 && trackNumberY > 0){
+                    gemNChamberTrack->Fill(std::min(trackNumberY,trackNumberX));
+                    gemTrackCount  = gemTrackCount + 1.0;
+                }
+            }
+
+        }
+    }
+
+    std::cout<<"GEM Track Efficiency :"<< gemTrackCount/vdcTrackCount<<std::endl;
+    TCanvas *canv = new TCanvas("Canv","Canv",1930,1080);
+    canv->Divide(2,1);
+    canv->Draw();
+    canv->cd(1);
+    gemNChamberTrack->Draw();
+    {
+        for (auto i = 0; i < gemNChamberTrack->GetXaxis()->GetNbins(); i++){
+            if (gemNChamberTrack->GetBinContent(i)>10){
+                float ratio = float (gemNChamberTrack->GetBinContent(i))/float (gemNChamberTrack->GetEntries());
+                float patch = float (gemNChamberTrack->GetXaxis()->GetXmax()- gemNChamberTrack->GetXaxis()->GetXmin())/gemNChamberTrack->GetXaxis()->GetNbins();
+                TLatex *tex = new TLatex((i-1)*patch,gemNChamberTrack->GetBinContent(i)+50,Form("%1.1f%%",ratio*100));
+                tex->SetTextSize(0.04);
+                tex->SetTextColor(6);
+                tex->Draw("same");
+            }
+        }
+    }
+    canv->cd(2);
+    {
+        for (auto chamberID: chamberIDList){
+            gemModuleNChamberTrackRatio->Fill(chamberID,gemChamberTrackCount[chamberID]/gemTrackCount);
+            gemModuleNChamberTrackRatio->SetBinError(chamberID+1,0.001);
+            gemModuleNChamberTrackRatio->SetMarkerStyle(20);
+//            gemModuleNChamberTrackRatio->SetMarkerStyle(2);
+            gemModuleNChamberTrackRatio->SetMarkerColor(4);
+            gemModuleNChamberTrackRatio->GetYaxis()->SetRangeUser(0.90,1.1);
+        }
+    }
+    gemModuleNChamberTrackRatio->Draw("E");
+
+    canv->Update();
+
+}
+
 void vdcEfficiencyMap(TString det ="VDC"){
     TString nameTemplate = "/home/newdriver/PRex_GEM/PRex_replayed/prexRHRS_%d_30000.root";
     std::map<Int_t,Int_t> rateTable;

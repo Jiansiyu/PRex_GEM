@@ -34,3 +34,7 @@ gemNoiseSignalLevel()
 
 ![](./doc/x_dist.jpg)
 
+## calculate the ratio of the GEM track and the VDC Track
+```c++
+vdcGEMTrackRatio(TSting fname)
+```
