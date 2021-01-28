@@ -1667,6 +1667,8 @@ void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/
     canv->Draw();
     canv->cd(1);
     gemNChamberTrack->Draw();
+    TLatex *txt = new TLatex(0,500,Form("#frac{GEM Track}{VDC Track}=%1.1f%%",100*gemTrackCount/vdcTrackCount));
+    txt->Draw("same");
     {
         for (auto i = 0; i < gemNChamberTrack->GetXaxis()->GetNbins(); i++){
             if (gemNChamberTrack->GetBinContent(i)>10){
@@ -1676,6 +1678,7 @@ void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/
                 tex->SetTextSize(0.04);
                 tex->SetTextColor(6);
                 tex->Draw("same");
+
             }
         }
     }
@@ -1687,7 +1690,7 @@ void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/
             gemModuleNChamberTrackRatio->SetMarkerStyle(20);
 //            gemModuleNChamberTrackRatio->SetMarkerStyle(2);
             gemModuleNChamberTrackRatio->SetMarkerColor(4);
-            gemModuleNChamberTrackRatio->GetYaxis()->SetRangeUser(0.90,1.1);
+            gemModuleNChamberTrackRatio->GetYaxis()->SetRangeUser(0.70,1.1);
         }
     }
     gemModuleNChamberTrackRatio->Draw("E");
