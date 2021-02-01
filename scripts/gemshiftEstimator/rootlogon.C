@@ -1,3 +1,2 @@
 {
-//	gROOT->LoadMacro("rootReader2.C");
-}
+	gROOT->LoadMacro("rootReader2.C"); }
