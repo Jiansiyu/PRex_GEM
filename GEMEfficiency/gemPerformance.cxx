@@ -646,7 +646,7 @@ float vdcEfficiency(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/pr
         GEMProfix = "RGEM.rgems";
     }
 
-    auto vdcEvent = chain -> GetEntries(Form("Ndata.%s.tr.ph > 0 && Ndata.%s.tr.th > 0",HRS.Data(),HRS.Data()));
+    auto vdcEvent = chain -> GetEntries(Form("Ndata.%s.tr.d_ph > 0 && Ndata.%s.tr.d_th > 0",HRS.Data(),HRS.Data()));
     auto totalEvent = chain->GetEntries();
     float  res = double_t (vdcEvent)/totalEvent;
     std::cout<<"\t" << vdcEvent<<"/"<<totalEvent<<" = "<< res *100<<"%"<<std::endl;
