@@ -217,11 +217,7 @@ void rootReader2(TString fname){
     std::map<int16_t,std::vector<int16_t>> TsampleLit;
 
     for (int i = 0; i <= 6; ++i) {
-        if (HRS == "R"){
-            if (chain->GetListOfBranches()->Contains(Form("RGEM.rgems.x%d.coord.pos",i))) chamberIDList.push_back(i);
-        }else{
-            if (chain->GetListOfBranches()->Contains(Form("LGEM.lgems.x%d.coord.pos",i))) chamberIDList.push_back(i);
-        }
+        if (chain->GetListOfBranches()->Contains(Form("%s.x%d.coord.pos",GEMProfix.Data(),i))) chamberIDList.push_back(i);
     }
 
     // initialize the buffers
@@ -235,8 +231,8 @@ void rootReader2(TString fname){
         }
         std::cout<<std::endl;
     }
-
     std::cout<<"******************  Reading Done  *********************"<<std::endl;
+
     // LINK THE LIST
     Int_t fEvtNum=0;
     Int_t fRun=0;
@@ -303,6 +299,7 @@ void rootReader2(TString fname){
     }
 
     double_t DetectorZpos[7]={0.0,  0.9, 1.5982485,  1.8558464, 2.3839658, 2.5141378, 2.6395974};
+
     auto databasePos= ReadDatabase(HRS.Data(),DBLoadFolder.Data());
     for (int i = 1; i <= 6; ++i) {
         if (databasePos.find(i)!=databasePos.end()){
