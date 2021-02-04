@@ -191,8 +191,7 @@ std::map<int,TVector3> ReadDatabase(TString HRS = "R",TString DB_DIR="./"){
 }
 
 
-void rootReader2(TString fname){
-
+void rootReader2(TString fname,Bool_t save2pdf= false){
 
     if (fname.IsNull()){
         std::cout<<"[ERROR]:: can NOT find root file "<<fname.Data()<<std::endl;
@@ -496,8 +495,8 @@ void rootReader2(TString fname){
 
     TCanvas *eventCanvas=new TCanvas("CanvasDisplay","CanvasDisplay",1000,1000);
     eventCanvas->Draw();
-
-    for(auto entry=1;entry<(chain->GetEntries()) && entry<2000;entry++){
+    eventCanvas->Print(Form("EvtDisp_%d.pdf(",runID),"pdf");
+    for(auto entry=1;entry<(chain->GetEntries()) && entry<100;entry++){
         eventCanvas->Clear();
         eventCanvas->Divide(1,2);
         eventCanvas->cd(1)->Divide(3,1);
@@ -745,7 +744,7 @@ void rootReader2(TString fname){
         }
 
         eventCanvas->Update();
-
+        eventCanvas->Print(Form("EvtDisp_%d.pdf",runID),"pdf");
         //-------------------------------------
         std::cout<<"------------ Located the reconstructed angles -------------------"<<std::endl;
         std::cout<<"===> "<<std::endl;
@@ -769,13 +768,15 @@ void rootReader2(TString fname){
             std::cout<<"  "<<GEMTrackphi[i]<<",   ";
         }
         //if(DetHitArrX.size()<=4)
-        getchar();
+        if (! save2pdf)getchar();
 
         DetHist2DYZ->Delete();
         DetHist2DXZ->Delete();
         DetCoordPosXZ->Delete();
         DetCoordPosYZ->Delete();
     }
+    eventCanvas->Print(Form("EvtDisp_%d.pdf)",runID),"pdf");
+
     FILE *trackXYZ=fopen("trackxyz.txt","w");
     // write the data to file
     for (auto Event : DetEventBuff){
