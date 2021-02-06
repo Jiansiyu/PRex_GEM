@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     TString hostStr=std::string(hostname);
 
     TString pathTemplate("/home/newdriver/PRex/PRex_Data/Raw/");
-    if (hostStr.Contains("jlab.org")){
+    if (hostStr.Contains("jlab.org") || hostStr.Contains("aonl") ){
         pathTemplate="/cache/halla/happexsp/raw/";
         std::cout<<"Work on Ifarm System: "<<pathTemplate<<std::endl;
     } else{

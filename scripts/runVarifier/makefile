@@ -39,7 +39,7 @@ LIBS      +=${ROOTLIBS} ${ROOTGLIBS} -lMinuit -L${EVIO_LIB}  -lexpat ${EVIO_LIB}
 endif
 
 GLIBS     +=${ROOTGLIBS} ${SYSLIBS}
-LINKOPTION += -pthread -lm -ldl -lconfig++
+LINKOPTION += -pthread -lm -ldl #-lconfig++
 
 
 # searching for the link files and its source file
@@ -63,7 +63,7 @@ ${TARGET}: ${OBJS}
 	@echo ${OBJS}
 	@echo 'Building target: $@'
 	@mkdir -p $(@D)
-	@$(CC)  $(OBJS)  $(LIBS) ${LIBS}  ${LINKOPTION} -o  $@
+	@$(CC)  $(OBJS)  $(LIBS)  ${LINKOPTION} -o  $@
 	#@cp ${patsubst %.cpp, %Dic_rdict.pcm, ${SLOT_SOURCE}} ${THIS_DIR}/
 	@echo 'Finish building: $@'
 	#@{RM} ${OBJS}
