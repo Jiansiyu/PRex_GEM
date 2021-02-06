@@ -1426,7 +1426,7 @@ float gemOnlyTrackEfficiency(TString fname="/home/newdriver/PRex_GEM/PRex_replay
 
 ///The ratio of the GEM track and the VDC track
 /// \param fname
-void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/prexRHRS_20862_00_test.root"){
+TCanvas *vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/prexRHRS_20862_00_test.root"){
 
     ROOT::EnableImplicitMT(8);
     TChain *chain = new TChain("T");
@@ -1654,7 +1654,7 @@ void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/
 
             trackNumberX += Ndata_GEM_X_coord_trkpos[chamberID];
             trackNumberY += Ndata_GEM_Y_coord_trkpos[chamberID];
-            if (Ndata_GEM_X_coord_trkpos[chamberID] > 0 ||  Ndata_GEM_Y_coord_trkpos[chamberID]>0)
+            if (Ndata_GEM_X_coord_trkpos[chamberID] > 0 &&  Ndata_GEM_Y_coord_trkpos[chamberID]>0)
                 gemChamberTrackCount[chamberID] = gemChamberTrackCount[chamberID] + 1.0;
         }
         if (trackNumberX > 0 && trackNumberY > 0){
@@ -1665,7 +1665,7 @@ void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/
     }
 
     std::cout<<"GEM Track Efficiency :"<< gemTrackCount/vdcTrackCount<<std::endl;
-    TCanvas *canv = new TCanvas("Canv","Canv",1930,1080);
+    TCanvas *canv = new TCanvas(Form("vdcGEMEff_Canv_%d",runID),Form("vdcGEMEff_Canv_%d",runID),1930,1080);
     canv->Divide(2,1);
     canv->Draw();
     canv->cd(1);
@@ -1698,6 +1698,30 @@ void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/
     gemModuleNChamberTrackRatio->Draw("E");
     canv->Update();
     canv->SaveAs(Form("vdcGEMEffRatio_run%d.jpg",runID));
+    return canv;
+}
+
+void vdcGEMTrackRatioRunner(TString pdfSaveName = "vdcGEMEffRationResult.pdf"){
+    std::vector<TString> runList;
+    {
+        runList.push_back("/home/newdriver/PRex_GEM/PRex_replayed/prexRHRS_20862_-1.root");
+        for (auto i = 21281; i< 21293; i ++){
+            TString filename =Form("/home/newdriver/PRex_GEM/PRex_replayed/prexRHRS_%d_-1.root",i);
+            if (!gSystem->AccessPathName(filename.Data()))
+            runList.push_back(filename.Data());
+        }
+    }
+    TCanvas *canv = new TCanvas("Canv","Canv",1960,1080);
+    canv->Draw();
+    canv->Print(Form("%s(",pdfSaveName.Data()),"pdf");
+
+    for (auto fname : runList){
+        canv = vdcGEMTrackRatio(fname.Data())->GetCanvas();
+        canv->Print(Form("%s",pdfSaveName.Data()),"pdf");
+        canv->Update();
+    }
+    canv->Print(Form("%s)",pdfSaveName.Data()),"pdf");
+
 }
 
 void vdcEfficiencyMap(TString det ="VDC"){

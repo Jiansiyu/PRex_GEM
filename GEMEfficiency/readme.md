@@ -39,4 +39,9 @@ gemNoiseSignalLevel()
 ```c++
 vdcGEMTrackRatio(TSting fname)
 ```
+
+Input the file name , and will save in pdf files
+```c++
+vdcGEMTrackRatioRunner()
+```
 ![](./doc/vdcGEMEffRatio_run20862.jpg)
