@@ -1642,22 +1642,24 @@ void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/
             }
             if (eventCutFlag){
                 vdcTrackCount = vdcTrackCount + 1.0;
-                // get the GEM track
-                Int_t trackNumberX = 0 ;
-                Int_t trackNumberY = 0 ;
-                for(auto chamberID: chamberIDList){
-
-                    trackNumberX += Ndata_GEM_X_coord_trkpos[chamberID];
-                    trackNumberY += Ndata_GEM_Y_coord_trkpos[chamberID];
-                    if (Ndata_GEM_X_coord_trkpos[chamberID] > 0 &&  Ndata_GEM_Y_coord_trkpos[chamberID]>0)
-                        gemChamberTrackCount[chamberID] = gemChamberTrackCount[chamberID] + 1.0;
-                }
-                if (trackNumberX > 0 && trackNumberY > 0){
-                    gemNChamberTrack->Fill(std::max(trackNumberY,trackNumberX));
-                    gemTrackCount  = gemTrackCount + 1.0;
-                }
             }
 
+        }
+
+        // get the GEM track, there is no reason that we use double cut for GEM
+        // get the GEM track
+        Int_t trackNumberX = 0 ;
+        Int_t trackNumberY = 0 ;
+        for(auto chamberID: chamberIDList){
+
+            trackNumberX += Ndata_GEM_X_coord_trkpos[chamberID];
+            trackNumberY += Ndata_GEM_Y_coord_trkpos[chamberID];
+            if (Ndata_GEM_X_coord_trkpos[chamberID] > 0 ||  Ndata_GEM_Y_coord_trkpos[chamberID]>0)
+                gemChamberTrackCount[chamberID] = gemChamberTrackCount[chamberID] + 1.0;
+        }
+        if (trackNumberX > 0 && trackNumberY > 0){
+            gemNChamberTrack->Fill(std::max(trackNumberY,trackNumberX));
+            gemTrackCount  = gemTrackCount + 1.0;
         }
 
     }
@@ -1695,6 +1697,7 @@ void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/
     }
     gemModuleNChamberTrackRatio->Draw("E");
     canv->Update();
+    canv->SaveAs(Form("vdcGEMEffRatio_run%d.jpg",runID));
 }
 
 void vdcEfficiencyMap(TString det ="VDC"){
