@@ -19,6 +19,7 @@
 #include <map>
 #include <TPaveText.h>
 #include <TStyle.h>
+#include <TProcPool.h>
 #include "TChain.h"
 #include "TLatex.h"
 #include "TVector3.h"
@@ -28,6 +29,8 @@
 #include "TGraphErrors.h"
 #include "TMultiGraph.h"
 #include "TLegend.h"
+#include "TROOT.h"
+#include "TBenchmark.h"
 TTree *tree;
 // check the existance of the branch and attach to the data
 // the data size need to initilize before load to the data
@@ -997,6 +1000,8 @@ void gemVDCTrackEfficiency2(TString fname ="/home/newdriver/PRex/PRex_Data/GEMRo
 /// Project the VDC to each GEM and get the efficiency compare with the VDC
 /// \param fname
 void gemVDCTrackEfficiency(TString fname ="/home/newdriver/PRex/PRex_Data/GEMRootFile/prexRHRS_20862_00_test.root"){
+
+
     TChain *chain = new TChain("T");
     chain -> Add(fname.Data());
     Int_t runID = chain->GetMaximum("fEvtHdr.fRun");
@@ -1210,7 +1215,6 @@ void gemVDCTrackEfficiency(TString fname ="/home/newdriver/PRex/PRex_Data/GEMRoo
         pt->Draw("same");
     }
     effcanvas->Update();
-
 }
 
 ///
@@ -1424,6 +1428,7 @@ float gemOnlyTrackEfficiency(TString fname="/home/newdriver/PRex_GEM/PRex_replay
 /// \param fname
 void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/prexRHRS_20862_00_test.root"){
 
+    ROOT::EnableImplicitMT(8);
     TChain *chain = new TChain("T");
     chain -> Add(fname.Data());
     Int_t runID = chain->GetMaximum("fEvtHdr.fRun");
@@ -1604,28 +1609,24 @@ void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/
         gemModuleNChamberTrackRatio = new TH1F(Form("Efficiency of GEM %d",runID),Form("\"Efficiency\" of GEM %d",runID),8,0,8);
     }
 
-
-
     double gemTrackCount = 0.0;
     double vdcTrackCount = 0.0;
     std::map<Int_t, double> gemChamberTrackCount;
 
     for (auto chamberID:chamberIDList) gemChamberTrackCount[chamberID] = 0.0;
-
-    Long64_t entries = chain->GetEntries();
-    for (Long64_t entry = 0; entry < entries; entry ++ ){
+    Long64_t entries = chain->GetEntriesFast();
+//    for (Long64_t entry = 0; entry < entries; entry ++ )
+    for (Long64_t entry : ROOT::TSeqUL(entries))
+    {
         chain->GetEntry(entry);
-
         if (entry%100==0 ) {
             MemInfo_t memInfo;
             CpuInfo_t cpuInfo;
             gSystem->GetMemInfo(&memInfo);
             std::cout<<"\x1B[s"<<Form("\tProgress %2.1f",(double)entry*100/entries)<<"%" <<" /"<<Form("RAM:%6d KB",memInfo.fMemUsed)<<"\x1B[u" << std::flush;
         }
-
         //TODO check the vdc us with in the range of the detectors
         //calculate filter the event within the range
-
 
         // get the vdc Track
         if (NDatavdcTrY > 0 && NDatavdcTrX > 0 && NDatavdcTrPH >0 && NDatavdcTrTH > 0){
@@ -1639,7 +1640,6 @@ void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/
                     eventCutFlag = false;
                 }
             }
-
             if (eventCutFlag){
                 vdcTrackCount = vdcTrackCount + 1.0;
                 // get the GEM track
@@ -1653,12 +1653,13 @@ void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/
                         gemChamberTrackCount[chamberID] = gemChamberTrackCount[chamberID] + 1.0;
                 }
                 if (trackNumberX > 0 && trackNumberY > 0){
-                    gemNChamberTrack->Fill(std::min(trackNumberY,trackNumberX));
+                    gemNChamberTrack->Fill(std::max(trackNumberY,trackNumberX));
                     gemTrackCount  = gemTrackCount + 1.0;
                 }
             }
 
         }
+
     }
 
     std::cout<<"GEM Track Efficiency :"<< gemTrackCount/vdcTrackCount<<std::endl;
@@ -1688,15 +1689,12 @@ void vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/
             gemModuleNChamberTrackRatio->Fill(chamberID,gemChamberTrackCount[chamberID]/gemTrackCount);
             gemModuleNChamberTrackRatio->SetBinError(chamberID+1,0.001);
             gemModuleNChamberTrackRatio->SetMarkerStyle(20);
-//            gemModuleNChamberTrackRatio->SetMarkerStyle(2);
             gemModuleNChamberTrackRatio->SetMarkerColor(4);
             gemModuleNChamberTrackRatio->GetYaxis()->SetRangeUser(0.70,1.1);
         }
     }
     gemModuleNChamberTrackRatio->Draw("E");
-
     canv->Update();
-
 }
 
 void vdcEfficiencyMap(TString det ="VDC"){

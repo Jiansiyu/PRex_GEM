@@ -496,7 +496,7 @@ void rootReader2(TString fname,Bool_t save2pdf= false){
     TCanvas *eventCanvas=new TCanvas("CanvasDisplay","CanvasDisplay",1000,1000);
     eventCanvas->Draw();
     eventCanvas->Print(Form("EvtDisp_%d.pdf(",runID),"pdf");
-    for(auto entry=1;entry<(chain->GetEntries()) && entry<100;entry++){
+    for(auto entry=1;entry<(chain->GetEntries()) && entry<200;entry++){
         eventCanvas->Clear();
         eventCanvas->Divide(1,2);
         eventCanvas->cd(1)->Divide(3,1);

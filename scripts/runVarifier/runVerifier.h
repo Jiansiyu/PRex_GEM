@@ -8,6 +8,7 @@
 #include "TString.h"
 #include "vector"
 #include "map"
+#include "vector"
 class runVerifier {
 public:
     runVerifier(){};
@@ -16,8 +17,7 @@ public:
     bool isValidGEMRun(std::vector<TString> fList);
     bool Save(TString f);
 private:
-    std::map<TString,bool> validRunBuff;
-
+    int ProcessSspBlock(const std::vector<uint32_t> &block_vec);
 };
 
 
