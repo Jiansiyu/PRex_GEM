@@ -9,10 +9,25 @@
 #include "vector"
 #include "TString.h"
 #include "TSystem.h"
-
+#include "unistd.h"
+#include "limits.h"
 int main(int argc, char* argv[]) {
 
+    char hostname[HOST_NAME_MAX];
+    char username[LOGIN_NAME_MAX];
+    gethostname(hostname, HOST_NAME_MAX);
+    getlogin_r(username, LOGIN_NAME_MAX);
+
+    TString hostStr=std::string(hostname);
+
     TString pathTemplate("/home/newdriver/PRex/PRex_Data/Raw/");
+    if (hostStr.Contains("jlab.org")){
+        pathTemplate="/cache/halla/happexsp/raw/";
+        std::cout<<"Work on Ifarm System: "<<pathTemplate<<std::endl;
+    } else{
+        pathTemplate="/home/newdriver/PRex/PRex_Data/Raw/";
+        std::cout<<"Work on local System: "<<pathTemplate<<std::endl;
+    }
 
     TApplication theApp("runVerifier",&argc,argv);
     runVerifier verifier;
