@@ -421,16 +421,25 @@ std::map<Int_t,std::map<Int_t,TH1F *>> getGEMCluster(TString fname="/home/newdri
 }
 
 void getGEMClusterRunner(TString pdfSaveName="gemClusterInfor.pdf"){
-    gStyle->SetPalette(1);
-    gStyle->SetOptStat(0);
+//    gStyle->SetPalette(1);
+//    gStyle->SetOptStat(0);
     TFile resultTFile(Form("%s_Res.root",__FUNCTION__ ),"recreate");
 
     TString rawPathDir = "/home/newdriver/PRex_GEM/PRex_replayed";
     std::map<Int_t,TString> runList;
+//    {
+////        runList[20862]=(Form("%s/prexRHRS_20862_01_gem.root",rawPathDir.Data()));
+//        for (auto i = 21281; i< 21295; i ++){
+//            TString filename =Form("%s/prexRHRS_%d_-1.root",rawPathDir.Data(),i);
+//            if (!gSystem->AccessPathName(filename.Data()))
+//                runList[i]=(filename.Data());
+//        }
+//    }
+
     {
-//        runList[20862]=(Form("%s/prexRHRS_20862_01_gem.root",rawPathDir.Data()));
-        for (auto i = 21281; i< 21295; i ++){
-            TString filename =Form("%s/prexRHRS_%d_-1.root",rawPathDir.Data(),i);
+//        runList.push_back(Form("%s/prexRHRS_20862_-1.root",rawPathDir.Data()));
+        for (auto i = 2139; i< 2151; i ++){
+            TString filename =Form("%s/prexLHRS_%d_01_gem.root",rawPathDir.Data(),i);
             if (!gSystem->AccessPathName(filename.Data()))
                 runList[i]=(filename.Data());
         }

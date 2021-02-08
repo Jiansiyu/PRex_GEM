@@ -1737,7 +1737,7 @@ TCanvas *vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootF
             gemModuleNChamberTrackRatio->SetBinError(chamberID+1,binError);
             gemModuleNChamberTrackRatio->SetMarkerStyle(20);
             gemModuleNChamberTrackRatio->SetMarkerColor(4);
-            gemModuleNChamberTrackRatio->GetYaxis()->SetRangeUser(0.70,1.1);
+            gemModuleNChamberTrackRatio->GetYaxis()->SetRangeUser(0.0,1.1);
         }
     }
     gemModuleNChamberTrackRatio->Draw("E");
@@ -1756,20 +1756,30 @@ TCanvas *vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootF
     return canv;
 }
 
-void vdcGEMTrackRatioRunner(TString pdfSaveName = "vdcGEMEffRationResult_6GEMs_maxmiss2_disableratio.pdf"){
+void vdcGEMTrackRatioRunner(TString pdfSaveName = "vdcGEMEffRationResult_6GEMs_maxmiss2_lhrs.pdf"){
 
-    TFile resultTFile(Form("%s_Res.root",__FUNCTION__ ),"recreate");
+    TFile resultTFile(Form("%s_Res_LHRS.root",__FUNCTION__ ),"recreate");
 
     TString rawPathDir = "/home/newdriver/PRex_GEM/PRex_replayed";
     std::vector<TString> runList;
+//    {
+//        runList.push_back(Form("%s/prexRHRS_20862_-1.root",rawPathDir.Data()));
+//        for (auto i = 21281; i< 21294; i ++){
+//            TString filename =Form("%s/prexRHRS_%d_-1.root",rawPathDir.Data(),i);
+//            if (!gSystem->AccessPathName(filename.Data()))
+//            runList.push_back(filename.Data());
+//        }
+//    }
+
     {
-        runList.push_back(Form("%s/prexRHRS_20862_-1.root",rawPathDir.Data()));
-        for (auto i = 21281; i< 21294; i ++){
-            TString filename =Form("%s/prexRHRS_%d_-1.root",rawPathDir.Data(),i);
+//        runList.push_back(Form("%s/prexRHRS_20862_-1.root",rawPathDir.Data()));
+        for (auto i = 2139; i< 2151; i ++){
+            TString filename =Form("%s/prexLHRS_%d_01_gem.root",rawPathDir.Data(),i);
             if (!gSystem->AccessPathName(filename.Data()))
-            runList.push_back(filename.Data());
+                runList.push_back(filename.Data());
         }
     }
+
     TCanvas *canv = new TCanvas("Canv","Canv",1960,1080);
     canv->Draw();
     canv->Print(Form("%s(",pdfSaveName.Data()),"pdf");
