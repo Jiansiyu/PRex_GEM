@@ -33,6 +33,6 @@ if __name__ == '__main__':
                 call(["jsub", ss])
 
     else:
-        threadPool = Pool(min(multiprocessing.cpu_count(),4))
+        threadPool = Pool(min(multiprocessing.cpu_count(),6))
         runIDs = [int(x) for x in sys.argv[1:] if str(x).isnumeric()]
         threadPool.map(run,runIDs)

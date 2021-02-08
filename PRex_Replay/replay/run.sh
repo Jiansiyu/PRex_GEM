@@ -14,4 +14,6 @@ else
 #        analyzer -b -q 'setupL.C('${1}')'
 fi
 
-analyzer -b -q 'replay.C('${1}')'
+#analyzer -b -q 'replay.C('${1}','30000')'
+analyzer -b -q 'gemrun.C('${1}')'
+

@@ -179,7 +179,7 @@ void gemNoiseSignalLevel(TString fname = "/home/newdriver/PRex/PRex_Data/GEMRoot
 	assert(fileio);
 	fileio->GetObject("T",tree);
 	fileio->Print();
-
+    Int_t runID = tree->GetMaximum("fEvtHdr.fRun");
 	// read out the noise and signal level
 	std::string noisePattern_x;
 	std::string noisePattern_y;
@@ -232,18 +232,18 @@ void gemNoiseSignalLevel(TString fname = "/home/newdriver/PRex/PRex_Data/GEMRoot
 
 	for (auto ChamberID : gemGetDetectorList(fname)){
 		if(noiseHist_x.find(ChamberID)==noiseHist_x.end()){
-			noiseHist_x[ChamberID]=new TH1F(Form("%s_Chamber%d_X",HRS.c_str(),ChamberID),Form("%s_Chamber%d_X",HRS.c_str(),ChamberID),2000,-1000,4000);
+			noiseHist_x[ChamberID]=new TH1F(Form("%s%d_Chamber%d_X",HRS.c_str(),runID,ChamberID),Form("%s%d_Chamber%d_X",HRS.c_str(),runID,ChamberID),2000,-1000,4000);
 		}
 		if(noiseHist_y.find(ChamberID)==noiseHist_y.end()){
-			noiseHist_y[ChamberID]=new TH1F(Form("%s_Chamber%d_Y",HRS.c_str(),ChamberID),Form("%s_Chamber%d_Y",HRS.c_str(),ChamberID),2000,-1000,4000);
+			noiseHist_y[ChamberID]=new TH1F(Form("%s%d_Chamber%d_Y",HRS.c_str(),runID,ChamberID),Form("%s%d_Chamber%d_Y",HRS.c_str(),runID,ChamberID),2000,-1000,4000);
 		}
 
 		if(signalHist_x.find(ChamberID)==signalHist_x.end()){
-			signalHist_x[ChamberID]=new TH1F(Form("%s_Chamber%d_sigLevel_X",HRS.c_str(),ChamberID),Form("%s_Chamber%d_sigLevel_X",HRS.c_str(),ChamberID),2000,-1000,4000);
+			signalHist_x[ChamberID]=new TH1F(Form("%s%d_Chamber%d_sigLevel_X",HRS.c_str(),runID,ChamberID),Form("%s%d_Chamber%d_sigLevel_X",HRS.c_str(),runID,ChamberID),2000,-1000,4000);
 			signalHist_x[ChamberID]->SetLineColor(2);
 		}
 		if(signalHist_y.find(ChamberID)==signalHist_y.end()){
-			signalHist_y[ChamberID]=new TH1F(Form("%s_Chamber%d_sigLevel_Y",HRS.c_str(),ChamberID),Form("%s_Chamber%d_sigLevel_Y",HRS.c_str(),ChamberID),2000,-1000,4000);
+			signalHist_y[ChamberID]=new TH1F(Form("%s%d_Chamber%d_sigLevel_Y",HRS.c_str(),runID,ChamberID),Form("%s%d_Chamber%d_sigLevel_Y",HRS.c_str(),runID,ChamberID),2000,-1000,4000);
 			signalHist_y[ChamberID]->SetLineColor(2);
 		}
 
@@ -1612,10 +1612,16 @@ TCanvas *vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootF
     double gemTrackCount = 0.0;
     double vdcTrackCount = 0.0;
     std::map<Int_t, double> gemChamberTrackCount;
+    std::map<Int_t, double> gemChamberTrackTotalCount;
 
-    for (auto chamberID:chamberIDList) gemChamberTrackCount[chamberID] = 0.0;
+    for (auto chamberID:chamberIDList) {
+        gemChamberTrackCount[chamberID] = 0.0;
+        gemChamberTrackTotalCount[chamberID] = 0.0;
+    }
+
     Long64_t entries = chain->GetEntriesFast();
-//    for (Long64_t entry = 0; entry < entries; entry ++ )
+
+    //for (Long64_t entry = 0; entry < entries; entry ++ )
     for (Long64_t entry : ROOT::TSeqUL(entries))
     {
         chain->GetEntry(entry);
@@ -1648,17 +1654,37 @@ TCanvas *vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootF
 
         // get the GEM track, there is no reason that we use double cut for GEM
         // get the GEM track
+        for (auto chamberID : chamberIDList){
+            //check all the other chambers, make sure all the other chamber have effective
+            Int_t  trackExNumber = 0;
+            for (auto exChamberID: chamberIDList){
+                if (exChamberID != chamberID){
+                    if (Ndata_GEM_X_coord_trkpos[exChamberID] > 0 && Ndata_GEM_Y_coord_trkpos[exChamberID] > 0 ){
+                        trackExNumber += 1;
+                    }
+                }
+            }
+            if (trackExNumber >= chamberIDList.size() -1){
+                gemChamberTrackTotalCount[chamberID] = gemChamberTrackTotalCount[chamberID] + 1.0;
+                if (Ndata_GEM_X_coord_trkpos[chamberID] > 0 && Ndata_GEM_Y_coord_trkpos[chamberID] > 0){
+                    gemChamberTrackCount[chamberID] = gemChamberTrackCount[chamberID] + 1.0;
+                }
+            }
+
+        }
+
+
         Int_t trackNumberX = 0 ;
         Int_t trackNumberY = 0 ;
         for(auto chamberID: chamberIDList){
-
             trackNumberX += Ndata_GEM_X_coord_trkpos[chamberID];
             trackNumberY += Ndata_GEM_Y_coord_trkpos[chamberID];
-            if (Ndata_GEM_X_coord_trkpos[chamberID] > 0 &&  Ndata_GEM_Y_coord_trkpos[chamberID]>0)
-                gemChamberTrackCount[chamberID] = gemChamberTrackCount[chamberID] + 1.0;
+            //TODO need a smart way to change the condition
+            //if (Ndata_GEM_X_coord_trkpos[chamberID] > 0 &&  Ndata_GEM_Y_coord_trkpos[chamberID]>0)
+            //gemChamberTrackCount[chamberID] = gemChamberTrackCount[chamberID] + 1.0;
         }
         if (trackNumberX > 0 && trackNumberY > 0){
-            gemNChamberTrack->Fill(std::max(trackNumberY,trackNumberX));
+            gemNChamberTrack->Fill(std::min(trackNumberY,trackNumberX));
             gemTrackCount  = gemTrackCount + 1.0;
         }
 
@@ -1670,8 +1696,7 @@ TCanvas *vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootF
     canv->Draw();
     canv->cd(1);
     gemNChamberTrack->Draw();
-    TLatex *txt = new TLatex(0,500,Form("#frac{GEM Track}{VDC Track}=%1.1f%%",100*gemTrackCount/vdcTrackCount));
-    txt->Draw("same");
+
     {
         for (auto i = 0; i < gemNChamberTrack->GetXaxis()->GetNbins(); i++){
             if (gemNChamberTrack->GetBinContent(i)>10){
@@ -1685,28 +1710,60 @@ TCanvas *vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootF
             }
         }
     }
+    TLatex *txt = new TLatex(0,gemNChamberTrack->GetBinContent(gemNChamberTrack->GetMaximumBin())*0.5,Form("#frac{GEM Track}{VDC Track}=%1.1f%%",100*gemTrackCount/vdcTrackCount));
+    txt->SetTextSize(0.04);
+    txt->Draw("same");
+
     canv->cd(2);
+
     {
         for (auto chamberID: chamberIDList){
-            gemModuleNChamberTrackRatio->Fill(chamberID,gemChamberTrackCount[chamberID]/gemTrackCount);
-            gemModuleNChamberTrackRatio->SetBinError(chamberID+1,0.001);
+            std::cout<<"Chamber "<< chamberID<<" : "<<gemChamberTrackCount[chamberID] <<" / "<< gemChamberTrackTotalCount[chamberID]<<std::endl;
+            //double ratio = gemChamberTrackCount[chamberID]/gemTrackCount;
+            double  ratio = gemChamberTrackCount[chamberID] / gemChamberTrackTotalCount[chamberID];
+
+            gemModuleNChamberTrackRatio->Fill(chamberID,ratio);
+
+            double a = gemChamberTrackCount[chamberID];
+            double b = gemChamberTrackTotalCount[chamberID];
+            double aerror = std::sqrt(a);
+            double berror = std::sqrt(b);
+            double_t  binError = std::sqrt( (aerror/b)*(aerror/b) + (a*berror/(b*b))*(a*berror/(b*b)));
+
+            // binomial proportion confidence interval
+            //https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval
+//            double binError = std::sqrt(ratio *(1-ratio));
+
+            gemModuleNChamberTrackRatio->SetBinError(chamberID+1,binError);
             gemModuleNChamberTrackRatio->SetMarkerStyle(20);
             gemModuleNChamberTrackRatio->SetMarkerColor(4);
             gemModuleNChamberTrackRatio->GetYaxis()->SetRangeUser(0.70,1.1);
         }
     }
     gemModuleNChamberTrackRatio->Draw("E");
+    // write the value on canvas
+    for (auto i = 0 ; i < gemModuleNChamberTrackRatio->GetXaxis()->GetNbins(); i++){
+        if (gemModuleNChamberTrackRatio->GetBinContent(i)>0.5){
+            float  patch = float (gemModuleNChamberTrackRatio->GetXaxis()->GetXmax() - gemModuleNChamberTrackRatio->GetXaxis()->GetXmin())/gemModuleNChamberTrackRatio->GetXaxis()->GetNbins();
+            TLatex *tex = new TLatex((i-0.7)*patch,gemModuleNChamberTrackRatio->GetBinContent(i)+0.01,Form("%1.1f%%",100*gemModuleNChamberTrackRatio->GetBinContent(i)));
+            tex->SetTextSize(0.03);
+            tex->Draw("same");
+
+        }
+    }
     canv->Update();
     canv->SaveAs(Form("vdcGEMEffRatio_run%d.jpg",runID));
     return canv;
 }
 
-void vdcGEMTrackRatioRunner(TString pdfSaveName = "vdcGEMEffRationResult.pdf"){
+void vdcGEMTrackRatioRunner(TString pdfSaveName = "vdcGEMEffRationResult_5GEMs_maxmiss2.pdf"){
+
+    TString rawPathDir = "/home/newdriver/PRex_GEM/PRex_replayed";
     std::vector<TString> runList;
     {
-        runList.push_back("/home/newdriver/PRex_GEM/PRex_replayed/prexRHRS_20862_-1.root");
+        runList.push_back(Form("%s/prexRHRS_20862_01_gem.root",rawPathDir.Data()));
         for (auto i = 21281; i< 21293; i ++){
-            TString filename =Form("/home/newdriver/PRex_GEM/PRex_replayed/prexRHRS_%d_-1.root",i);
+            TString filename =Form("%s/prexRHRS_%d_01_gem.root",rawPathDir.Data(),i);
             if (!gSystem->AccessPathName(filename.Data()))
             runList.push_back(filename.Data());
         }
