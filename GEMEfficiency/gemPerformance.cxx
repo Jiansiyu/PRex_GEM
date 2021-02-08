@@ -1758,6 +1758,8 @@ TCanvas *vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootF
 
 void vdcGEMTrackRatioRunner(TString pdfSaveName = "vdcGEMEffRationResult_6GEMs_maxmiss2_disableratio.pdf"){
 
+    TFile resultTFile(Form("%s_Res.root",__FUNCTION__ ),"recreate");
+
     TString rawPathDir = "/home/newdriver/PRex_GEM/PRex_replayed";
     std::vector<TString> runList;
     {
@@ -1776,9 +1778,12 @@ void vdcGEMTrackRatioRunner(TString pdfSaveName = "vdcGEMEffRationResult_6GEMs_m
         canv = vdcGEMTrackRatio(fname.Data())->GetCanvas();
         canv->Print(Form("%s",pdfSaveName.Data()),"pdf");
         canv->Update();
+        canv->Write();
     }
     canv->Print(Form("%s)",pdfSaveName.Data()),"pdf");
 
+    resultTFile.Write();
+    resultTFile.Close();
 }
 
 void vdcEfficiencyMap(TString det ="VDC"){
