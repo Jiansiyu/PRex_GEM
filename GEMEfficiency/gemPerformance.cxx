@@ -1712,7 +1712,7 @@ TCanvas *vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootF
     }
     TLatex *txt = new TLatex(0,gemNChamberTrack->GetBinContent(gemNChamberTrack->GetMaximumBin())*0.5,Form("#frac{GEM Track}{VDC Track}=%1.1f%%",100*gemTrackCount/vdcTrackCount));
     txt->SetTextSize(0.04);
-    txt->Draw("same");
+//    txt->Draw("same");
 
     canv->cd(2);
 
@@ -1756,14 +1756,14 @@ TCanvas *vdcGEMTrackRatio(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootF
     return canv;
 }
 
-void vdcGEMTrackRatioRunner(TString pdfSaveName = "vdcGEMEffRationResult_5GEMs_maxmiss2.pdf"){
+void vdcGEMTrackRatioRunner(TString pdfSaveName = "vdcGEMEffRationResult_6GEMs_maxmiss2_disableratio.pdf"){
 
     TString rawPathDir = "/home/newdriver/PRex_GEM/PRex_replayed";
     std::vector<TString> runList;
     {
-        runList.push_back(Form("%s/prexRHRS_20862_01_gem.root",rawPathDir.Data()));
-        for (auto i = 21281; i< 21293; i ++){
-            TString filename =Form("%s/prexRHRS_%d_01_gem.root",rawPathDir.Data(),i);
+        runList.push_back(Form("%s/prexRHRS_20862_-1.root",rawPathDir.Data()));
+        for (auto i = 21281; i< 21294; i ++){
+            TString filename =Form("%s/prexRHRS_%d_-1.root",rawPathDir.Data(),i);
             if (!gSystem->AccessPathName(filename.Data()))
             runList.push_back(filename.Data());
         }
