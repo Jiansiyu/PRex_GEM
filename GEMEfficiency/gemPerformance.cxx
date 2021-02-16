@@ -657,7 +657,6 @@ float vdcEfficiency(TString fname="/home/newdriver/PRex/PRex_Data/GEMRootFile/pr
 }
 
 
-
 // Project the VDC to each GEM plane and calculate the efficiency of each GEM
 // Calculate the sigma, and set the searching area to be 5 sigma
 void gemTrackEfficiency2(TString fname = "/home/newdriver/PRex/PRex_Data/GEMRootFile/prexRHRS_20862_00_test.root"){
@@ -1762,7 +1761,7 @@ void vdcGEMTrackRatioRunner(TString pdfSaveName = "vdcGEMEffRationResult_6GEMs_m
 
     TString rawPathDir = "/home/newdriver/PRex_GEM/PRex_replayed";
     std::vector<TString> runList;
-//    {
+//  {
 //        runList.push_back(Form("%s/prexRHRS_20862_-1.root",rawPathDir.Data()));
 //        for (auto i = 21281; i< 21294; i ++){
 //            TString filename =Form("%s/prexRHRS_%d_-1.root",rawPathDir.Data(),i);
@@ -1770,7 +1769,6 @@ void vdcGEMTrackRatioRunner(TString pdfSaveName = "vdcGEMEffRationResult_6GEMs_m
 //            runList.push_back(filename.Data());
 //        }
 //    }
-
     {
 //        runList.push_back(Form("%s/prexRHRS_20862_-1.root",rawPathDir.Data()));
         for (auto i = 2139; i< 2151; i ++){
